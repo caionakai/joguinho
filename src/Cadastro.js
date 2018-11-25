@@ -34,26 +34,18 @@ class Cadastro extends React.Component {
   msgServidor(){
 	var soap = require('soap-everywhere');
 	var url = 'http://localhost:8001/wscalc1?wsdl';
-	var param = {
-		a: this.state.a,
-		b: this.state.b
-	};
+
 	soap.createClient(url, function(err, client) {
 	    if (err) throw err;
+
 	    console.log(client.describe().ws.calc);
-	    client.multiplicar(param,function(err,res){
+
+	    client.GetUser({name:'Gabriel'},function(err,res){
 	        if (err) throw err;
 	        console.log(res);
-	    });
-	    client.sumar({a: 4,b: 3},function(err,res){
-	        if (err) throw err;
-	        console.log(res);
-	    });
-	    client.devolvenome({nome: 'caio'},function(err,res){
-	         if (err) throw err;
-	        console.log(res);  	
 	    });
 	});
+
 }
 
   render() {
