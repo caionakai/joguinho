@@ -5,14 +5,17 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 import { BrowserRouter , Switch, Route} from 'react-router-dom'
 import Cadastro from './Cadastro'
-
+import Header from './Header.js'
 ReactDOM.render(
+    <div>
+        <Header></Header>
 	    <BrowserRouter>
-        <Switch>
-            <Route path="/" exact={true} component={App} />
-            <Route path="/cadastro" component={Cadastro} />
-        </Switch>
-    </ BrowserRouter>, document.getElementById('root'));
+            <Switch>
+                <Route path="/" exact={true} component={App} />
+                <Route path="/cadastro" component={Cadastro} />
+            </Switch>
+        </ BrowserRouter>
+    </div>, document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

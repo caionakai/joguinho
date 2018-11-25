@@ -3,30 +3,42 @@
 
 const soap = require('soap');
 const http = require('http');
+const matrixSize = 100;
 
 let userList = [];
 
-let user = {
-    name: 'Gabriel',
-    map_x: 0,
-    map_y: 0
-};
 
-userList.unshift(user);
-userList.unshift(user);
-userList.unshift(user);
-userList.unshift(user);
-userList.unshift(user);
+function createUser(name){
+    // generate two random numbers to define the position of the user in the map
+    var map_x = Math.floor((Math.random() * matrixSize)) // gabriel esse é o tamanho da matriz
+    var map_y = Math.floor((Math.random() * matrixSize))
+    
+    let user = {
+        name: name,
+        map_x: map_x,
+        map_y: map_y
+    };
+    userList.unshift(user);
+    return user;
+}
+
+function getUser(name){
+    return userList.find(x=> x.name===name)
+}
+
 
 let service = {
     ws: {
-        calc: {
+        funcoes: {
             GetUser: function (name) {
                 console.log(name);
-                return {User: user}
+                return {User: getUser(name)}
             },
             GetUserList: function (name) {
                 return {Users: userList}
+            },
+            CreateUser: function (name){
+                return {User: createUser(name)}
             }
         }
     }
