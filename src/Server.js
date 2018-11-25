@@ -42,7 +42,7 @@ function createUser(name){
 }
 
 function getUser(name){
-    return userList.find(x=> x.name===name)
+    return userList.find(x=> x.name === name)
 }
 
 let service = {
@@ -50,13 +50,13 @@ let service = {
         funcoes: {
             GetUser: function (name) {
                 console.log(name);
-                return {User: user}
+                return {User: getUser(name)}
             },
             GetUserList: function (name) {
                 return {Users: userList}
             },
             GetMap: function (user) {
-                return {map: load_map(user)}
+                return {map: load_map(getUser(user))}
             },
             CreateUser: function (name){
                 return {User: createUser(name)}
