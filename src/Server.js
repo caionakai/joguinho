@@ -15,7 +15,7 @@ let user = {
 function create_map() {
     for (let i = 0; i < 30; i++) {
         for (let j = 0; j < 30; j++) {
-            map.append({x: i, y: j, usuario: null})
+            map.unshift({x: i, y: j, usuario: null})
         }
     }
 }
