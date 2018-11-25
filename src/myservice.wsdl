@@ -73,4 +73,5 @@
             <soap:address location="http://localhost:8001/wscalc1"/>
         </wsdl:port>
     </wsdl:service>
+>>>>>>> 6a600868c7aa3517c600a19d47c7da0cf6909740
 </wsdl:definitions>
