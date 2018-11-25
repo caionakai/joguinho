@@ -27,17 +27,27 @@ function load_map(user) {
         return Math.abs(position.x - user.map_x) <= 2 && Math.abs(position.y - user.map_y) <= 2
     })
 }
+function createUser(name){
+    // generate two random numbers to define the position of the user in the map
+    let map_x = Math.floor((Math.random() * map.length));
+    let map_y = Math.floor((Math.random() * map.length));
 
+    let user = {
+        name: name,
+        map_x: map_x,
+        map_y: map_y
+    };
+    userList.unshift(user);
+    return user;
+}
 
-userList.unshift(user);
-userList.unshift(user);
-userList.unshift(user);
-userList.unshift(user);
-userList.unshift(user);
+function getUser(name){
+    return userList.find(x=> x.name===name)
+}
 
 let service = {
     ws: {
-        calc: {
+        funcoes: {
             GetUser: function (name) {
                 console.log(name);
                 return {User: user}
@@ -47,6 +57,9 @@ let service = {
             },
             GetMap: function (user) {
                 return {map: load_map(user)}
+            },
+            CreateUser: function (name){
+                return {User: createUser(name)}
             }
         }
     }
