@@ -3,11 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
     "react": "^16.6.3",
     "react-bootstrap": "^0.32.4",
     "react-dom": "^16.6.3",
     "react-router-dom": "^4.3.1",
-    "react-scripts": "2.1.1"
+    "react-scripts": "2.1.1",
+    "soap": "^0.25.0",
+    "soap-everywhere": "^1.0.7"
   },
   "scripts": {
     "start": "react-scripts start",

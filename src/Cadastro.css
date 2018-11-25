@@ -1,3 +1,9 @@
 #inventario{
 	outline-color: black; 
 }
+#form{
+	padding: 2%;
+}
+#btn{
+	margin-top: 1%;
+}

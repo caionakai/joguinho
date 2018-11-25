@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
-import { FormGroup, FormControl, ControlLabel, HelpBlock } from 'react-bootstrap';
-
+import { Button, FormGroup, FormControl, ControlLabel, HelpBlock } from 'react-bootstrap';
+import './Cadastro.css';
 
 class Cadastro extends React.Component {
   constructor(props, context) {
     super(props, context);
 
     this.handleChange = this.handleChange.bind(this);
+    this.msgServidor = this.msgServidor.bind(this);
 
     this.state = {
       value: ''
@@ -25,24 +26,44 @@ class Cadastro extends React.Component {
     this.setState({ value: e.target.value });
   }
 
+  msgServidor(){
+var soap = require('soap-everywhere');
+var url = 'http://localhost:8001/wscalc1?wsdl';
+
+soap.createClient(url, function(err, client) {
+    if (err) throw err;
+    console.log(client.describe().ws.calc);
+    client.multiplicar({a: 4,b: 3},function(err,res){
+        if (err) throw err;
+        console.log(res);
+    });
+    client.sumar({a: 4,b: 3},function(err,res){
+        if (err) throw err;
+        console.log(res);
+    });
+});
+}
+
   render() {
     return (
-      <form>
-        <FormGroup
-          controlId="formBasicText"
-          validationState={this.getValidationState()}
-        >
-          <ControlLabel>Working example with validation</ControlLabel>
-          <FormControl
-            type="text"
-            value={this.state.value}
-            placeholder="Enter text"
-            onChange={this.handleChange}
-          />
-          <FormControl.Feedback />
-          <HelpBlock>Validation is based on string length.</HelpBlock>
-        </FormGroup>
-      </form>
+    	<div id="form">
+	      <form>
+	        <FormGroup
+	          controlId="formBasicText"
+	          validationState={this.getValidationState()}
+	        >
+	        <ControlLabel>Teste</ControlLabel>
+	        <FormControl
+	            type="text"
+	            value={this.state.value}
+	            placeholder="Digite aqui"
+	            onChange={this.handleChange}
+	        />
+	        <FormControl.Feedback />
+	        <Button id="btn" onClick={this.msgServidor} bsStyle="info">Enviar</Button>
+	        </FormGroup>
+	      </form>
+    	</div>
     );
   }
 }
