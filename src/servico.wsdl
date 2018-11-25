@@ -1,32 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<wsdl:definitions name="wscalc1" targetNamespace="http://localhost:8000/wscalc1" xmlns="http://localhost:3000" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<wsdl:definitions name="wscalc1" targetNamespace="http://localhost:8000/wscalc1" 
+  xmlns="http://localhost:3000" 
+  xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" 
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <types>
-      <xsd:complexType name='Nani'>
-  <xsd:complexContent mixed='false'>
-    <xsd:restriction base='soapenc:Array'>
-      <xsd:attribute wsdl:arrayType='Nani[]' ref='soapenc:arrayType' />
-    </xsd:restriction>
-  </xsd:complexContent>
-</xsd:complexType>
-<xsd:complexType name='Nani'>
-  <xsd:all>
-    <xsd:element
-      minOccurs='0'
-      maxOccurs='1'
-      name='staffname'
-      type='xsd:string'/>
-    <xsd:element
-      minOccurs='0'
-      maxOccurs='1'
-      name='staffposition'
-      type='xsd:string'/>
-    <xsd:element
-      minOccurs='0'
-      maxOccurs='1'
-      name='salary'
-      type='xsd:int'/>
-  </xsd:all>
-</xsd:complexType>
+    <xsd:complexType name='Nani'>
+      <xsd:complexContent mixed='false'>
+        <xsd:restriction base='soapenc:Array'>
+          <xsd:attribute wsdl:arrayType='Nani[]' ref='soapenc:arrayType' />
+        </xsd:restriction>
+      </xsd:complexContent>
+    </xsd:complexType>
+    <xsd:complexType name='Nani'>
+      <xsd:all>
+        <xsd:element minOccurs='0' maxOccurs='1' name='staffname' type='xsd:string'/>
+        <xsd:element minOccurs='0' maxOccurs='1' name='staffposition' type='xsd:string'/>
+        <xsd:element minOccurs='0' maxOccurs='1' name='salary' type='xsd:int'/>
+      </xsd:all>
+    </xsd:complexType>
   </types>
   <wsdl:message name="sumarRequest">
     <wsdl:part name="a" type="xs:string"/>
