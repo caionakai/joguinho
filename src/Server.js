@@ -13,6 +13,10 @@ let user = {
 };
 
 userList.unshift(user);
+userList.unshift(user);
+userList.unshift(user);
+userList.unshift(user);
+userList.unshift(user);
 
 let service = {
     ws: {
@@ -21,7 +25,7 @@ let service = {
                 console.log(name);
                 return {User: user}
             },
-            GetUserList: function () {
+            GetUserList: function (name) {
                 return {Users: userList}
             }
         }

@@ -44,6 +44,11 @@ class Cadastro extends React.Component {
 	        if (err) throw err;
 	        console.log(res);
 	    });
+
+        client.GetUserList({name:'Gabriel'},function(err,res){
+            if (err) throw err;
+            console.log(res);
+        });
 	});
 
 }
