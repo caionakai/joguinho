@@ -33,9 +33,43 @@
                             type='xsd:int'/>
                 </xsd:all>
             </xsd:complexType>
+
+            <xsd:complexType name='Position'>
+                <xsd:all>
+                    <xsd:element
+                            minOccurs='0'
+                            name='x'
+                            type='xsd:int'/>
+                    <xsd:element
+                            minOccurs='0'
+                            name='y'
+                            type='xsd:int'/>
+                    <xsd:element
+                            minOccurs='0'
+                            name='usuario'
+                            type='typens:User'/>
+                </xsd:all>
+            </xsd:complexType>
+
+            <xsd:complexType name='Map'>
+                <xsd:complexContent mixed='false'>
+                    <xsd:restriction base='soapenc:Array'>
+                        <xsd:attribute wsdl:arrayType='Position[]' ref='soapenc:arrayType'/>
+                    </xsd:restriction>
+                </xsd:complexContent>
+            </xsd:complexType>
+
+
         </xsd:schema>
     </types>
 
+    <wsdl:message name='GetMapRequest'>
+        <wsdl:part name='user' type='xsd:string'/>
+    </wsdl:message>
+
+    <wsdl:message name='GetMapResponse'>
+        <wsdl:part name='map' type='typens:Map'/>
+    </wsdl:message>
 
     <wsdl:message name='GetUserRequest'>
         <wsdl:part name='name' type='xsd:string'/>
@@ -54,6 +88,11 @@
     </wsdl:message>
 
     <wsdl:portType name="calcP">
+        <wsdl:operation name="GetMap">
+            <wsdl:input message="GetMapRequest"/>
+            <wsdl:output message="GetMapResponse"/>
+        </wsdl:operation>
+
         <wsdl:operation name="GetUser">
             <wsdl:input message="GetUserRequest"/>
             <wsdl:output message="GetUserResponse"/>
@@ -67,6 +106,18 @@
 
     <wsdl:binding name="Game" type="calcP">
         <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+        <wsdl:operation name="GetMap">
+            <soap:operation soapAction="GetMap"/>
+            <wsdl:input>
+                <soap:body use="encoded"
+                           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="encoded"
+                           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </wsdl:output>
+        </wsdl:operation>
 
         <wsdl:operation name="GetUser">
             <soap:operation soapAction="GetUser"/>
