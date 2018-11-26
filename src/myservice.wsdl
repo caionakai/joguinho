@@ -64,7 +64,7 @@
     </types>
 
     <wsdl:message name='GetMapRequest'>
-        <wsdl:part name='user' type='xsd:string'/>
+        <wsdl:part name='name' type='xsd:string'/>
     </wsdl:message>
 
     <wsdl:message name='GetMapResponse'>
