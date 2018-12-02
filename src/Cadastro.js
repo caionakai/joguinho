@@ -30,7 +30,7 @@ class Cadastro extends React.Component {
 	var url = 'http://localhost:8001/wscalc1?wsdl';
 	var nome = this.state.nome;
 	var props = this.props
-	var foto = this.selecionado
+	var foto = this.state.selecionado
 	soap.createClient(url, function(err, client) {
 	    if (err) throw err;
 			// interfaces

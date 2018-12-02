@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import './App.css';
 import { Button, FormGroup, FormControl, ControlLabel} from 'react-bootstrap';
+import saber from './saber.png';
+import archer from './archer.png';
+import corrin from './corrin.png';
 
 class App extends Component {
   constructor(props, context) {
@@ -12,6 +15,7 @@ class App extends Component {
       x: '--',
       y: '--',
       item: '',
+      imagem:saber
     }
   }
   addInventario(){
@@ -34,7 +38,25 @@ class App extends Component {
   }
   componentDidMount(){
     this.setState(this.props.location.state)
-    console.log(this.props.location.state)
+    switch (this.props.location.foto){
+      case 'corrin': {
+        this.setState({imagem: corrin});
+        break;
+      }
+      case 'saber':{
+        this.setState({imagem: saber});
+        break;
+      }
+      case 'archer':{
+        this.setState({imagem: archer});
+        break;
+      }
+      default:{
+        this.setState({imagem: null})
+      }
+    }
+    // console.log(this.props.location.state)
+
   }
   render() {
     return (
@@ -43,6 +65,7 @@ class App extends Component {
         <h2>Nome: {this.state.name} </h2>
         <h2>x: {this.state.x} </h2>
         <h2>y: {this.state.y} </h2>
+        <img src={this.state.imagem}/>
           <Button onClick={this.load_map}>Click</Button>
         <form>
 	        <FormGroup
