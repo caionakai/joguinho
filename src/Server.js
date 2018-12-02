@@ -24,8 +24,8 @@ function load_map(user) {
 }
 function createUser(name){
     // generate two random numbers to define the position of the user in the map
-    let map_x = Math.floor((Math.random() * map.length));
-    let map_y = Math.floor((Math.random() * map.length));
+    let map_x = Math.floor((Math.random() * Math.sqrt(map.length)));
+    let map_y = Math.floor((Math.random() * Math.sqrt(map.length)));
 
     let user = {
         name: name,
@@ -50,7 +50,7 @@ let service = {
             GetUserList: function (name) {
                 return {Users: userList}
             },
-            GetMap: function (user) {
+            GetMap: function (name) {
                 return {map: load_map(getUser(user))}
             },
             CreateUser: function (name){
