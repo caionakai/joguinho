@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Button, FormGroup, FormControl, ControlLabel} from 'react-bootstrap';
 import './Cadastro.css';
 
+
 class Cadastro extends React.Component {
   constructor(props, context) {
     super(props, context);
@@ -22,7 +23,7 @@ class Cadastro extends React.Component {
 	var soap = require('soap-everywhere');
 	var url = 'http://localhost:8001/wscalc1?wsdl';
 	var nome = this.state.nome;
-
+	var props = this.props
 	soap.createClient(url, function(err, client) {
 	    if (err) throw err;
 			// interfaces
@@ -30,6 +31,7 @@ class Cadastro extends React.Component {
 			client.CreateUser({name:nome},function(err,res){
 				if (err) throw err;
 				console.log(res);
+				props.history.push({pathname:'/', state: {name:res.User.name.name, x:res.User.map_x, y: res.User.map_y}});
 			});
 
 	});
@@ -43,14 +45,14 @@ class Cadastro extends React.Component {
 	        <FormGroup
 	          controlId="formBasicText"
 	        >
-	        <ControlLabel>Teste</ControlLabel>
+	        <ControlLabel>Nome do Usuário</ControlLabel>
 	        <FormControl
 	            type="text"
 	            value={this.state.nome}
-	            placeholder="Digite um numero"
+	            placeholder="Digite um nome"
 	            onChange={this.handleChange}
 	        />
-	        <Button id="btn" onClick={this.msgServidor} bsStyle="info">Enviar</Button>
+	        <Button id="btn" onClick={this.msgServidor} bsStyle="info">Criar Usuário</Button>
 	        </FormGroup>
 	      </form>
     	</div>

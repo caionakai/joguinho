@@ -6,11 +6,6 @@ const http = require('http');
 
 let userList = [];
 let map = [];
-let user = {
-    name: 'Gabriel',
-    map_x: 0,
-    map_y: 0
-};
 
 function create_map() {
     for (let i = 0; i < 30; i++) {

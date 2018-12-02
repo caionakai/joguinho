@@ -12,7 +12,7 @@ ReactDOM.render(
 	    <BrowserRouter>
             <Switch>
                 <Route path="/" exact={true} component={App} />
-                <Route path="/cadastro" component={Cadastro} />
+                <Route path="/cadastro" render={(props) => ( <Cadastro {...props}/>)}/>
             </Switch>
         </ BrowserRouter>
     </div>, document.getElementById('root'));
