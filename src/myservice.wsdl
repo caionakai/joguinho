@@ -17,6 +17,15 @@
                     </xsd:restriction>
                 </xsd:complexContent>
             </xsd:complexType>
+
+            <xsd:complexType name='InventarioList'>
+                <xsd:complexContent mixed='false'>
+                    <xsd:restriction base='soapenc:Array'>
+                        <xsd:attribute wsdl:arrayType='Inventario[]' ref='soapenc:arrayType'/>
+                    </xsd:restriction>
+                </xsd:complexContent>
+            </xsd:complexType>
+
             <xsd:complexType name='User'>
                 <xsd:all>
                     <xsd:element
@@ -25,11 +34,19 @@
                             type='xsd:string'/>
                     <xsd:element
                             minOccurs='0'
-                            name='map_x'
+                            name='x'
                             type='xsd:int'/>
                     <xsd:element
                             minOccurs='0'
-                            name='map_y'
+                            name='y'
+                            type='xsd:int'/>
+                    <xsd:element
+                            minOccurs='0'
+                            name='inventario'
+                            type='typens:InventarioList'/>
+                    <xsd:element
+                            minOccurs='0'
+                            name='gold'
                             type='xsd:int'/>
                 </xsd:all>
             </xsd:complexType>
@@ -95,6 +112,23 @@
         <wsdl:part name='Users' type='typens:UserList'/>
     </wsdl:message>
 
+    <wsdl:message name='GetInventarioRequest'>
+        <wsdl:part name="name" type='xsd:string'/>
+    </wsdl:message>
+
+    <wsdl:message name='GetInventarioResponse'>
+        <wsdl:part name='Inventario' type='typens:InventarioList'/>
+    </wsdl:message>
+
+    <wsdl:message name='AddInventarioRequest'>
+        <wsdl:part name="name" type='xsd:string'/>
+        <wsdl:part name="item" type='xsd:string'/>
+    </wsdl:message>
+
+    <wsdl:message name='AddInventarioResponse'>
+        <wsdl:part name='Inventario' type='typens:InventarioList'/>
+    </wsdl:message>
+
     <wsdl:portType name="metodos">
         <wsdl:operation name="GetMap">
             <wsdl:input message="GetMapRequest"/>
@@ -114,6 +148,16 @@
         <wsdl:operation name="GetUserList">
             <wsdl:input message="GetUserListRequest"/>
             <wsdl:output message="GetUserListResponse"/>
+        </wsdl:operation>
+
+        <wsdl:operation name="GetInventarioList">
+            <wsdl:input message="GetInventarioRequest"/>
+            <wsdl:output message="GetInventarioResponse"/>
+        </wsdl:operation>
+
+        <wsdl:operation name="AddInventario">
+            <wsdl:input message="AddInventarioRequest"/>
+            <wsdl:output message="AddInventarioResponse"/>
         </wsdl:operation>
     </wsdl:portType>
 
@@ -158,6 +202,30 @@
 
         <wsdl:operation name="GetUserList">
             <soap:operation soapAction="GetUserList"/>
+            <wsdl:input>
+                <soap:body use="encoded"
+                           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="encoded"
+                           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </wsdl:output>
+        </wsdl:operation>
+
+        <wsdl:operation name="GetInventarioList">
+            <soap:operation soapAction="GetInventarioList"/>
+            <wsdl:input>
+                <soap:body use="encoded"
+                           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="encoded"
+                           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </wsdl:output>
+        </wsdl:operation>
+
+        <wsdl:operation name="AddInventario">
+            <soap:operation soapAction="AddInventario"/>
             <wsdl:input>
                 <soap:body use="encoded"
                            encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
