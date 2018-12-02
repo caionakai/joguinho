@@ -8,9 +8,9 @@ let userList = [];
 let map = [];
 
 function create_map() {
-    for (let i = 0; i < 30; i++) {
-        for (let j = 0; j < 30; j++) {
-            map.unshift({x: i, y: j, usuario: null})
+    for (let i = 0; i < 15; i++) {
+        for (let j = 0; j < 15; j++) {
+            map.unshift({x: i, y: j})
         }
     }
 }
@@ -18,13 +18,14 @@ function create_map() {
 create_map();
 
 function load_map(user) {
-    return map.filter(position => {
-        return Math.abs(position.x - user.map_x) <= 2 && Math.abs(position.y - user.map_y) <= 2
-    })
+    return map
 }
-
+function map_add_user(user) {
+    let x = map.findIndex( posi=> posi.x === user.x && posi.y === user.y )
+    map[x].usuario = user;
+}
 // funcao para criar usuario
-function createUser(name){
+function createUser(name) {
     // generate two random numbers to define the position of the user in the map
     let map_x = Math.floor((Math.random() * Math.sqrt(map.length)));
     let map_y = Math.floor((Math.random() * Math.sqrt(map.length)));
@@ -38,30 +39,27 @@ function createUser(name){
         y: map_y,
         inventario: inventario,
         gold: gold,
-        
-    };
 
+    };
+    map_add_user(user);
     userList.unshift(user);
     return user;
 }
 
 // get usuario
-function getUser(name){
-    console.log(userList)
-    let x =userList.find(x=> x.name == name)
-    console.log(x)
-    return x
+function getUser(name) {
+    return userList.find(x => x.name === name);
 }
 
 // adiciona item no inventario passando nome do usuario e o item
-function addInventario(name, item){
-    let user = getUser(name)
+function addInventario(name, item) {
+    let user = getUser(name);
     user.inventario.unshift(item)
 }
 
 // get inventario passando nome do usuario
-function getInventario(name){
-    return userList.find(x=> x.name == name).inventario
+function getInventario(name) {
+    return userList.find(x => x.name === name).inventario
 }
 
 let service = {
@@ -74,17 +72,19 @@ let service = {
             GetUserList: function (name) {
                 return {Users: userList}
             },
-            GetMap: function (name) {
-                return {map: load_map(getUser(user))}
+            GetMap: function (obj) {
+                console.log(obj);
+                let x = getUser(obj.name);
+                return {map: load_map(x)}
             },
-            CreateUser: function (obj){
+            CreateUser: function (obj) {
                 return {User: createUser(obj.name)}
             },
-            GetInventarioList: function (obj){
+            GetInventarioList: function (obj) {
                 return {Inventario: getInventario(obj.name)}
             },
-            AddInventario: function (obj){
-                addInventario(obj.name, obj.item)
+            AddInventario: function (obj) {
+                addInventario(obj.name, obj.item);
                 return {Inventario: getInventario(obj.name)}
             }
         }
@@ -99,4 +99,4 @@ let server = http.createServer(function (request, response) {
 
 server.listen(8001);
 soap.listen(server, '/wscalc1', service, xml);
-console.log("server on..")
+console.log("server on..");
