@@ -32,8 +32,8 @@ class App extends Component {
         }
     }
 
-    handleItem(e) {
-        this.setState({item: e.target.value});
+    handleItem(item_name, item_image) {
+        this.setState({item: {name:item_name, imagem:item_image}});
     }
 
     handleChange(e) {
@@ -193,7 +193,7 @@ class App extends Component {
                     if (err) throw err;
                     console.log(res);
                     self.setState({
-                        inventario: res.Inventario.Inventario
+                        inventario: res.Inventario
                     });
                 });
                 client.RemoveGold({name: nome, valor: 50}, function (err, res) {
@@ -212,17 +212,23 @@ class App extends Component {
 
     imprimeInventario() {
         let array = [];
-        let item = this.state.inventario ? this.state.inventario : [];
-        if (typeof item == 'string') {
-            array.push(<li style={{paddingLeft: '3%'}}><img src={this.state.imgItem}
-                                                            style={{maxWidth: '40px', maxHeight: '40px'}}/>{item}</li>)
+        let item = this.state.inventario
+
+        console.log(item)
+        if(!item) return;
+        if(!(item instanceof Array)){
+            array.push(<li style={{paddingLeft: '3%'}}><img src={item.imagem}
+                                                            style={{maxWidth: '40px', maxHeight: '40px'}}/>{item.name}
+            </li>)            
             return array;
         }
+
         for (let i = 0; i < item.length; i++) {
+            console.log(item[i])
             // console.log(i)
 
-            array.push(<li style={{paddingLeft: '3%'}}><img src={this.state.imgItem}
-                                                            style={{maxWidth: '40px', maxHeight: '40px'}}/>{item[i]}
+            array.push(<li style={{paddingLeft: '3%'}}><img src={item[i].imagem}
+                                                            style={{maxWidth: '40px', maxHeight: '40px'}}/>{item[i].name}
             </li>)
 
         }
@@ -233,17 +239,17 @@ class App extends Component {
         let array = []
         array.push(
             <label style={{width: '50%', padding: '2%'}}><p>Preço $50</p>
-                <input type="radio" name="a" value="sword" onChange={this.handleItem}/>
+                <input type="radio" name="a" value="sword" onChange={()=>this.handleItem('sword', sword)}/>
                 <img src={sword}/></label>
         )
         array.push(
             <label style={{width: '50%', padding: '2%'}}><p>Preço $50</p>
-                <input type="radio" name="a" value="pistol" onChange={this.handleItem}/>
+                <input type="radio" name="a" value="pistol" onChange={()=>this.handleItem('pistol', pistol)}/>
                 <img src={pistol}/></label>
         )
         array.push(
             <label style={{width: '50%', padding: '2%'}}><p>Preço $50</p>
-                <input type="radio" name="a" value="bow" onChange={this.handleItem}/>
+                <input type="radio" name="a" value="bow" onChange={()=>this.handleItem('bow', bow)}/>
                 <img src={bow}/></label>
         )
         return array
@@ -330,6 +336,7 @@ class App extends Component {
             });
             client.GetInventarioList(obj, function (err, res) {
                 if (err) throw err;
+                // console.log(res.Inventario.Inventario.name)
                 self.setState({inventario: res.Inventario.Inventario})
             })
 
