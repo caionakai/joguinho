@@ -42,28 +42,35 @@ class App extends Component {
         this.setState({item: e.target.value});
     }
 
-    componentDidMount() {
-        this.setState(this.props.location.state);
-        this.load_map();
+    componentDidUpdate() {
+        if (!this.state.imagem)
+            switch (this.state.foto) {
+                case 'corrin': {
+                    this.setState({imagem: corrin});
+                    break;
+                }
+                case 'saber': {
+                    this.setState({imagem: saber});
+                    break;
+                }
+                case 'archer': {
+                    this.setState({imagem: archer});
+                    break;
+                }
+                default: {
+                    this.setState({imagem: null})
+                }
+            }
+    }
 
-        switch (this.props.location.foto) {
-            case 'corrin': {
-                this.setState({imagem: corrin});
-                break;
-            }
-            case 'saber': {
-                this.setState({imagem: saber});
-                break;
-            }
-            case 'archer': {
-                this.setState({imagem: archer});
-                break;
-            }
-            default: {
-                this.setState({imagem: null})
-            }
-        }
-        // console.log(this.props.location.state)
+    componentDidMount() {
+        let self = this
+        new Promise( async function (response, reject) {
+            await self.setState(self.props.location.state);
+            response()
+        }).then(function () {
+            self.load_map();
+        })
 
     }
 
@@ -75,13 +82,13 @@ class App extends Component {
         let children = [];
         children.push(<td>{`_//_`}</td>);
         for (let j = 0; j < size; j++) {
-            children.push(<td>{`_${(j +1).toString().padStart(2, '0')}_`}</td>)
+            children.push(<td>{`_${(j + 1).toString().padStart(2, '0')}_`}</td>)
         }
         table.push(<tr>{children}</tr>);
         for (let i = 0; i < size; i++) {
             let children = [];
             //Inner loop to create children
-            children.push(<td>{`_${(i +1).toString().padStart(2, '0')}_`}</td>);
+            children.push(<td>{`_${(i + 1).toString().padStart(2, '0')}_`}</td>);
             for (let j = 0; j < size; j++) {
                 if ('usuario' in this.state.map[i * size + j]) {
                     children.push(<td>{`_EE_`}</td>)
@@ -100,15 +107,15 @@ class App extends Component {
         return (
             <div className="App">
                 <table style={{width: '80%', marginLeft: '10%'}}>
-                    <tr style={{ border: '1px solid black'}}>
-                        <th style={{width: '25%',  border: '1px solid black'}}>
+                    <tr style={{border: '1px solid black'}}>
+                        <th style={{width: '25%', border: '1px solid black', textAlign: 'center'}}>
                             <h4>{this.state.name}</h4>
                             <img src={this.state.imagem} style={{width: '100%'}}/>
                         </th>
-                        <th style={{ border: '1px solid black', width: '40%'}}>
+                        <th style={{border: '1px solid black', width: '40%'}}>
                             {this.render_map()}
                         </th>
-                        <th style={{ border: '1px solid black', width: '35%'}}> asdsad</th>
+                        <th style={{border: '1px solid black', width: '35%'}}> asdsad</th>
                     </tr>
                 </table>
 
@@ -145,6 +152,11 @@ class App extends Component {
                 if (err) throw err;
                 self.setState(res.map)
             });
+            client.GetInventarioList(obj, function (err,res) {
+                if (err) throw err;
+                console.log(res)
+                self.setState(res)
+            })
 
         });
     }

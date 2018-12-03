@@ -59,7 +59,10 @@ function addInventario(name, item) {
 
 // get inventario passando nome do usuario
 function getInventario(name) {
-    return userList.find(x => x.name === name).inventario
+    let x = userList.find(x => x.name === name)
+    if (x)
+        return x.inventario
+    return []
 }
 
 let service = {
@@ -81,6 +84,7 @@ let service = {
                 return {User: createUser(obj.name)}
             },
             GetInventarioList: function (obj) {
+                console.log('III',obj)
                 return {Inventario: getInventario(obj.name)}
             },
             AddInventario: function (obj) {
