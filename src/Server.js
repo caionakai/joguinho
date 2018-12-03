@@ -30,7 +30,7 @@ function createUser(name) {
     let map_x = Math.floor((Math.random() * Math.sqrt(map.length)));
     let map_y = Math.floor((Math.random() * Math.sqrt(map.length)));
     let inventario = [];
-    let gold = 0;
+    let gold = 30;
 
     // user object
     let user = {
@@ -76,7 +76,6 @@ let service = {
                 return {Users: userList}
             },
             GetMap: function (obj) {
-                console.log(obj);
                 let x = getUser(obj.name);
                 return {map: load_map(x)}
             },
@@ -84,7 +83,6 @@ let service = {
                 return {User: createUser(obj.name)}
             },
             GetInventarioList: function (obj) {
-                console.log('III',obj)
                 return {Inventario: getInventario(obj.name)}
             },
             AddInventario: function (obj) {
