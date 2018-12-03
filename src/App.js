@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
-import { Modal, Button, FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import { Modal, Button, ProgressBar} from 'react-bootstrap';
 import saber from './saber.png';
 import archer from './archer.png';
 import corrin from './corrin.png';
@@ -16,6 +16,7 @@ class App extends Component {
     this.comprar = this.comprar.bind(this);
     this.load_map = this.load_map.bind(this);
     this.render_map = this.render_map.bind(this);
+    this.verificaItemImage = this.verificaItemImage.bind(this);
     this.state = {
       name: 'None',
       x: '--',
@@ -26,6 +27,7 @@ class App extends Component {
       lgShow: false,
       inventario: [],
       gold: 0,
+      imgItem: ''
     }
   }
 
@@ -101,16 +103,41 @@ class App extends Component {
     return table
   }
 
+  verificaItemImage(nomeItem){
+    switch (nomeItem) {
+      case 'sword': {
+        this.setState({ imgItem: sword });
+        break;
+      }
+      case 'pistol': {
+        this.setState({ imgItem: pistol });
+        break;
+      }
+      case 'bow': {
+        this.setState({ imgItem: bow });
+        break;
+      }
+      default: {
+        this.setState({ imgItem: null })
+      }
+    }
+  }
+
   comprar(){
     var soap = require('soap-everywhere');
     var url = 'http://localhost:8001/wscalc1?wsdl';
     var nome = this.state.name;
     var item = this.state.item;
     let self = this;
-    soap.createClient(url, function (err, client) {
+    if(this.state.gold < 50){
+        alert("vc nao tem money suficiente $$");
+        this.setState({lgShow: false})
+    }
+    else{
+      soap.createClient(url, function (err, client) {
       if (err) throw err;
-      // interfaces
-      // console.log(client.describe().ws.funcoes);
+      
+
       client.AddInventario({ name:nome, item: item}, function (err, res) {
         if (err) throw err;
         console.log(res);
@@ -118,22 +145,31 @@ class App extends Component {
           inventario: res.Inventario.Inventario
         });
       });
-
+      client.RemoveGold({name: nome, valor: 50}, function(err,res){
+        if (err) throw err;
+        console.log(res);
+        self.setState({
+          gold: res.Gold
+        });
+      });
+      
     });
+    this.verificaItemImage(item)
     this.setState({lgShow: false})
+    } 
   }
 
   imprimeInventario(){
     let array = [];
     let item = this.state.inventario? this.state.inventario: [];
-    console.log(item)
     if (typeof item == 'string'){
-      array.push(<li style={{paddingLeft: '3%'}}>{item}</li>)
+      array.push(<li style={{paddingLeft: '3%'}}><img src={this.state.imgItem} style={{maxWidth: '40px', maxHeight: '40px'}}/>{item}</li>)
       return array;
     }
     for(let i=0; i < item.length; i++){
       // console.log(i)
-      array.push(<li style={{paddingLeft: '3%'}}>{item[i]}</li>)
+
+      array.push(<li style={{paddingLeft: '3%'}}><img src={this.state.imgItem} style={{maxWidth: '40px', maxHeight: '40px'}}/>{item[i]}</li>)
 
     }
     return array
@@ -147,12 +183,12 @@ class App extends Component {
         <img src={sword}/></label>
       )
       array.push(
-      <label style={{width: '50%', padding: '2%'}}><p>Preço $60</p>
+      <label style={{width: '50%', padding: '2%'}}><p>Preço $50</p>
         <input type="radio" name="a" value="pistol" onChange={this.handleItem}/>
         <img src={pistol}/></label>
       )
       array.push(
-        <label style={{width: '50%', padding: '2%'}}><p>Preço $60</p>
+        <label style={{width: '50%', padding: '2%'}}><p>Preço $50</p>
           <input type="radio" name="a" value="bow" onChange={this.handleItem}/>
           <img src={bow}/></label>
         )      
@@ -163,16 +199,19 @@ class App extends Component {
     let lgClose = () => this.setState({ lgShow: false });
     return (
       <div className="App">
-        Gold: {this.state.gold}
+
         <table style={{ width: '80%', marginLeft: '10%' }}>
-        <tr>
-          <td><h4>{this.state.name}</h4></td>
-          <td>MAPA</td>
-          <td>INVENTÁRIO</td>
+        <tr style={{ border: '1px solid black' }}>
+          <td style={{ border: '1px solid black',textAlign: 'center' }}><h4>Nome: {this.state.name}</h4></td>
+          <td style={{ border: '1px solid black', fontWeight:'bold' ,textAlign: 'center'}}>MAPA</td>
+          <td style={{ border: '1px solid black',  fontWeight:'bold', textAlign: 'center'}}>INVENTÁRIO                <Button id="botaoLoja" bsStyle="primary" onClick={() => this.setState({ lgShow: true })}>
+                  Loja
+                </Button></td>
         </tr>
           <tr style={{ border: '1px solid black' }}>
             <th style={{ width: '25%', border: '1px solid black', textAlign: 'center' }}>
-              
+            <ProgressBar striped bsStyle="danger" now={this.state.life} label="Life"/>
+            <a style={{color:'yellow', fontSize:'20px'}}>Gold: ${this.state.gold}</a>
               <img src={this.state.imagem} style={{ width: '100%' }} />
             </th>
 
@@ -182,9 +221,7 @@ class App extends Component {
 
             <th style={{ border: '1px solid black', width: '35%' }}>
               <center>
-                <Button id="botaoLoja" bsStyle="primary" onClick={() => this.setState({ lgShow: true })}>
-                  Loja
-                </Button>
+
               </center>
               {this.imprimeInventario()}
             </th>

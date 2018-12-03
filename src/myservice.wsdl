@@ -48,6 +48,10 @@
                             minOccurs='0'
                             name='gold'
                             type='xsd:int'/>
+                    <xsd:element
+                            minOccurs='0'
+                            name='life'
+                            type='xsd:int'/>                            
                 </xsd:all>
             </xsd:complexType>
 
@@ -129,6 +133,15 @@
         <wsdl:part name='Inventario' type='typens:InventarioList'/>
     </wsdl:message>
 
+    <wsdl:message name='RemoveGoldRequest'>
+        <wsdl:part name="name" type='xsd:string'/>
+        <wsdl:part name="valor" type='xsd:int'/>
+    </wsdl:message>
+
+    <wsdl:message name='RemoveGoldResponse'>
+        <wsdl:part name='Gold' type='xsd:int'/>
+    </wsdl:message>
+
     <wsdl:portType name="metodos">
         <wsdl:operation name="GetMap">
             <wsdl:input message="GetMapRequest"/>
@@ -159,6 +172,11 @@
             <wsdl:input message="AddInventarioRequest"/>
             <wsdl:output message="AddInventarioResponse"/>
         </wsdl:operation>
+
+        <wsdl:operation name="RemoveGold">
+            <wsdl:input message="RemoveGoldRequest"/>
+            <wsdl:output message="RemoveGoldResponse"/>
+        </wsdl:operation>        
     </wsdl:portType>
 
     <wsdl:binding name="Game" type="metodos">
@@ -226,6 +244,18 @@
 
         <wsdl:operation name="AddInventario">
             <soap:operation soapAction="AddInventario"/>
+            <wsdl:input>
+                <soap:body use="encoded"
+                           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="encoded"
+                           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </wsdl:output>
+        </wsdl:operation>
+
+        <wsdl:operation name="RemoveGold">
+            <soap:operation soapAction="RemoveGold"/>
             <wsdl:input>
                 <soap:body use="encoded"
                            encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>

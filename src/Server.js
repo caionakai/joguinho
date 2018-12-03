@@ -30,8 +30,8 @@ function createUser(name) {
     let map_x = Math.floor((Math.random() * Math.sqrt(map.length)));
     let map_y = Math.floor((Math.random() * Math.sqrt(map.length)));
     let inventario = [];
-    let gold = 30;
-
+    let gold = 60;
+    let life = 100;
     // user object
     let user = {
         name: name,
@@ -39,6 +39,7 @@ function createUser(name) {
         y: map_y,
         inventario: inventario,
         gold: gold,
+        life: life,
 
     };
     map_add_user(user);
@@ -49,6 +50,14 @@ function createUser(name) {
 // get usuario
 function getUser(name) {
     return userList.find(x => x.name === name);
+}
+
+// tira dinheiro do usuario
+function removeGold(name ,valor){
+    let dinheiro = userList.find(x => x.name === name).gold
+    userList.find(x => x.name === name).gold = dinheiro - valor
+
+    return  userList.find(x => x.name === name).gold
 }
 
 // adiciona item no inventario passando nome do usuario e o item
@@ -88,6 +97,9 @@ let service = {
             AddInventario: function (obj) {
                 addInventario(obj.name, obj.item);
                 return {Inventario: getInventario(obj.name)}
+            },
+            RemoveGold: function (obj){
+                return {Gold: removeGold(obj.name, obj.valor) }
             }
         }
     }
