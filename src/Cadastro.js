@@ -41,7 +41,7 @@ class Cadastro extends React.Component {
             if (err) throw err;
             // interfaces
             console.log(client.describe().ws.funcoes);
-            client.CreateUser({name: nome}, function (err, res) {
+            client.CreateUser({name: nome, foto: foto}, function (err, res) {
                 if (err) throw err;
                 console.log(res);
                 props.history.push({pathname: '/', state: {...res.User, foto: foto}});

@@ -34,11 +34,19 @@
                             type='xsd:string'/>
                     <xsd:element
                             minOccurs='0'
+                            name='foto'
+                            type='xsd:string'/>
+                    <xsd:element
+                            minOccurs='0'
                             name='x'
                             type='xsd:int'/>
                     <xsd:element
                             minOccurs='0'
                             name='y'
+                            type='xsd:int'/>
+                    <xsd:element
+                            minOccurs='0'
+                            name='view'
                             type='xsd:int'/>
                     <xsd:element
                             minOccurs='0'
@@ -51,7 +59,11 @@
                     <xsd:element
                             minOccurs='0'
                             name='life'
-                            type='xsd:int'/>                            
+                            type='xsd:int'/>
+                    <xsd:element
+                            minOccurs='0'
+                            name='ataque'
+                            type='xsd:int'/>
                 </xsd:all>
             </xsd:complexType>
 
@@ -94,6 +106,7 @@
 
     <wsdl:message name='CreateUserRequest'>
         <wsdl:part name='name' type='xsd:string'/>
+        <wsdl:part name='foto' type='xsd:string'/>
     </wsdl:message>
 
     <wsdl:message name='CreateUserResponse'>
@@ -102,6 +115,22 @@
 
     <wsdl:message name='GetUserRequest'>
         <wsdl:part name='name' type='xsd:string'/>
+    </wsdl:message>
+
+    <wsdl:message name='AtacarRequest'>
+        <wsdl:part name='Atacante' type='typens:User'/>
+        <wsdl:part name='Alvo' type='typens:User'/>
+    </wsdl:message>
+    <wsdl:message name='AtacarResponse'>
+        <wsdl:part name='Enemy' type='typens:User'/>
+    </wsdl:message>
+
+    <wsdl:message name='MoveRequest'>
+        <wsdl:part name='Atacante' type='typens:User'/>
+        <wsdl:part name='Alvo' type='typens:Position'/>
+    </wsdl:message>
+    <wsdl:message name='MoveResponse'>
+        <wsdl:part name='User' type='typens:User'/>
     </wsdl:message>
 
     <wsdl:message name='GetUserResponse'>
@@ -152,6 +181,15 @@
             <wsdl:input message="GetUserRequest"/>
             <wsdl:output message="GetUserResponse"/>
         </wsdl:operation>
+        <wsdl:operation name="Atacar">
+            <wsdl:input message="AtacarRequest"/>
+            <wsdl:output message="AtacarResponse"/>
+        </wsdl:operation>
+
+        <wsdl:operation name="Move">
+            <wsdl:input message="MoveRequest"/>
+            <wsdl:output message="MoveResponse"/>
+        </wsdl:operation>
 
         <wsdl:operation name="CreateUser">
             <wsdl:input message="CreateUserRequest"/>
@@ -184,6 +222,29 @@
 
         <wsdl:operation name="GetMap">
             <soap:operation soapAction="GetMap"/>
+            <wsdl:input>
+                <soap:body use="encoded"
+                           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="encoded"
+                           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </wsdl:output>
+        </wsdl:operation>
+
+        <wsdl:operation name="Atacar">
+            <soap:operation soapAction="Atacar"/>
+            <wsdl:input>
+                <soap:body use="encoded"
+                           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="encoded"
+                           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="Move">
+            <soap:operation soapAction="Move"/>
             <wsdl:input>
                 <soap:body use="encoded"
                            encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>

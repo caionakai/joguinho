@@ -2,3 +2,9 @@
     position: relative;
     margin-left: 8%;
 }
+.hand{
+    text-decoration: none;
+}
+.hand:hover{
+    cursor:pointer;
+}
