@@ -1,10 +1,12 @@
-import React, {Component} from 'react';
-import {Button, FormGroup, FormControl, ControlLabel} from 'react-bootstrap';
+import React from 'react';
+import {Button, ControlLabel, FormControl, FormGroup} from 'react-bootstrap';
 import './Cadastro.css';
 import saber from './saber.png';
 import archer from './archer.png';
 import corrin from './corrin.png';
 import {url} from "./App";
+
+const soap = require('soap-everywhere');
 
 class Cadastro extends React.Component {
     constructor(props, context) {
@@ -15,8 +17,8 @@ class Cadastro extends React.Component {
         this.msgServidor = this.msgServidor.bind(this);
 
         this.state = {
-            nome: '',
-            selecionado: ''
+            name: '',
+            imagem: ''
         };
     }
 
@@ -25,18 +27,18 @@ class Cadastro extends React.Component {
     }
 
     mudaInput(e2) {
-        this.setState({selecionado: e2.target.value});
+        this.setState({imagem: e2.target.value});
     }
 
     handleChange(e) {
-        this.setState({nome: e.target.value});
+        this.setState({name: e.target.value});
     }
 
     msgServidor() {
-        var soap = require('soap-everywhere');
-        var nome = this.state.nome;
-        var props = this.props
-        var foto = this.state.selecionado
+
+        let nome = this.state.name;
+        let props = this.props;
+        let foto = this.state.imagem;
         soap.createClient(url, function (err, client) {
             if (err) throw err;
             // interfaces
@@ -61,25 +63,25 @@ class Cadastro extends React.Component {
                         <ControlLabel>Nome do Usuário</ControlLabel>
                         <FormControl
                             type="text"
-                            value={this.state.nome}
+                            value={this.state.name}
                             placeholder="Digite um nome"
                             onChange={this.handleChange}
                         />
                         <div id="inputs">
-                            <label class="radio-inline">
+                            <label className="radio-inline">
                                 <input type="radio" name="persona" id="persona" value='saber'
                                        onChange={this.mudaInput}/>
-                                <img src={saber}/>
+                                <img src={saber} alt={'Saber'}/>
                             </label>
-                            <label class="radio-inline">
+                            <label className="radio-inline">
                                 <input type="radio" name="persona" id="persona" value='archer'
                                        onChange={this.mudaInput}/>
-                                <img src={archer}/>
+                                <img src={archer} alt={'Archer'}/>
                             </label>
-                            <label class="radio-inline">
+                            <label className="radio-inline">
                                 <input type="radio" name="persona" id="persona" value="corrin"
                                        onChange={this.mudaInput}/>
-                                <img src={corrin}/>
+                                <img src={corrin} alt={'Corrin'}/>
                             </label>
                         </div>
                         <Button id="btn" onClick={this.msgServidor} bsStyle="info">Criar Usuário</Button>

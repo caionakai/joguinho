@@ -1,5 +1,5 @@
-// /*jslint node: true */
-// "use strict";
+/*jslint node: true */
+"use strict";
 
 const ip =require('ip').address();
 const soap = require('soap');
@@ -14,32 +14,45 @@ let Map = {
                 this.map.unshift({x: i, y: j})
             }
         }
-        for(let i=0;i< 5;i++)
-            this.add_monster({
-                name: 'Wolf',
-                life: 100,
-                gold: 10,
-                inventario: [],
-                ataque: 10
-            })
-        for(let i=0;i< 5;i++)
-            this.add_monster({
-                name: 'Bat',
-                life: 50,
-                gold: 5,
-                inventario: [],
-                ataque: 10
-            })
-        for(let i=0;i< 5;i++)
-            this.add_monster({
-                name: 'Spider',
-                life: 200,
-                gold: 30,
-                inventario: [],
-                ataque: 25
-            })
+        for(let i=0;i< 10;i++)
+            this.add_random_monster()
     },
-    add_monster: function (monster){
+    add_random_monster: function () {
+
+        switch (Math.floor((Math.random() * 4))) {
+            case 1:{
+                this.add_monster({
+                    name: 'Wolf',
+                    life: 100,
+                    gold: 10,
+                    inventario: [],
+                    ataque: 10
+                });
+                break;
+            }
+            case 2:{
+                this.add_monster({
+                    name: 'Bat',
+                    life: 50,
+                    gold: 5,
+                    inventario: [],
+                    ataque: 10
+                });
+                break;
+            }
+            case 3:{
+                this.add_monster({
+                    name: 'Spider',
+                    life: 200,
+                    gold: 30,
+                    inventario: [],
+                    ataque: 25
+                });
+                break;
+            }
+        }
+    }
+    ,add_monster: function (monster){
         let position = Map.clear();
         this.load_location(position.x, position.y).monster = monster
     },
@@ -50,7 +63,7 @@ let Map = {
         this.load_location(user.x,user.y).usuario = user
     },
     load_location: function (x,y) { // get usuario
-        return this.map.find( obj => obj.x == x && obj.y == y)
+        return this.map.find( obj => obj.x === parseInt(x) && obj.y === parseInt(y))
     },
     clear: function () {
         let len =  Math.sqrt(Map.map.length);
@@ -84,11 +97,11 @@ let User = {
         return this.userList.find( x => x.name === name)
     },
     load_location: function (x,y) { // get usuario
-        return this.userList.find( obj => obj.x == x && obj.y == y)
+        return this.userList.find( obj => obj.x === parseInt(x) && obj.y === parseInt(y))
     },
     remove: function (x,y){
         delete Map.load_location(x, y).usuario;
-        let i = this.userList.findIndex(obj => obj.x == x && obj.y == y);
+        let i = this.userList.findIndex(obj => obj.x === parseInt(x) && obj.y === parseInt(y));
         this.userList.splice(i,1);
     },
     remove_gold: function (name, valor) {// tira dinheiro do usuario
@@ -120,11 +133,12 @@ let User = {
                 if(alvo.life <= 0){
                     atacante.gold += alvo.gold;
                     atacante.inventario.concat(alvo.inventario);
-                    delete Map.load_location(obj.alvo.x, obj.alvo.y).monster
+                    delete Map.load_location(obj.alvo.x, obj.alvo.y).monster;
+                    Map.add_random_monster();
                 }
                 else if(atacante.life <=0){
                     alvo.inventario.concat(atacante.inventario);
-                    alvo.gold = atacante.gold
+                    alvo.gold = atacante.gold;
                     this.remove(obj.atacante.x,obj.atacante.y);
                 }
                 return alvo
@@ -143,16 +157,16 @@ let User = {
         position_alvo.usuario = user;
         return user
     },
-    add_item: function (name, item) { // adiciona item no inventario passando nome do usuario e o item
+    add_item: function (name, item) { // adiciona item no inventario passando name do usuario e o item
         this.load_name(name).inventario.push(item)
     },
     delete_item: function (name, item_name) {
-        let i = this.load_name(name).inventario.findIndex(item => item.name == item_name)
+        let i = this.load_name(name).inventario.findIndex(item => item.name === item_name);
         this.load_name(name).inventario.splice(i,1)
     },
     use_item: function (name, item_name, valor) {
         switch (item_name) {
-            case 'potion':{// cura vida passando nome do usuario e qnt de vida a ser curada
+            case 'potion':{// cura vida passando name do usuario e qnt de vida a ser curada
                 let x =this.load_name(name);
                 x.life += parseInt(valor);
                 this.delete_item(name,item_name);
@@ -162,25 +176,11 @@ let User = {
     }
 };
 Map.create();
-let userList = [];
-
-
-// get inventario passando nome do usuario
-function getInventario(name) {
-    let x = userList.find(x => x.name === name);
-    if (x)
-        return x.inventario;
-
-    return []
-}
 let service = {
     ws: {
         funcoes: {
             GetUser: function (obj) {
                 return {User: User.load_name(obj.name)}
-            },
-            GetUserList: function (name) {
-                return {Users: userList}
             },
             Atacar: function(obj){
               return User.atacar(obj)
@@ -188,7 +188,7 @@ let service = {
             Move: function(obj){
               return User.move(obj)
             },
-            GetMap: function (obj) {
+            GetMap: function () {
                 return {map: Map.load()}
             },
             CreateUser: function (obj) {
@@ -215,6 +215,7 @@ let service = {
 let xml = require('fs').readFileSync('myservice.wsdl', 'utf8');
 xml = xml.replace('localhost', ip);
 let server = express();
+
 server.use(cors());
 
 server.listen(8001);

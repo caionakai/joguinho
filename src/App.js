@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import './App.css';
-import {Modal, Button, ProgressBar} from 'react-bootstrap';
+import {Button, Modal, ProgressBar} from 'react-bootstrap';
 import saber from './saber.png';
 import archer from './archer.png';
 import corrin from './corrin.png';
@@ -8,8 +8,9 @@ import sword from './sword.png';
 import pistol from './pistol.png';
 import bow from './bow.png';
 import potion from './potion.png';
-const ip =require('ip').address();
-const url = 'http://'+ip+':8001/wscalc1?wsdl';
+
+const ip = require('ip').address();
+const url = 'http://' + ip + ':8001/wscalc1?wsdl';
 const soap = require('soap-everywhere');
 
 class App extends Component {
@@ -37,7 +38,7 @@ class App extends Component {
     }
 
     handleItem(item_name, item_image, preco) {
-        this.setState({item: {name:item_name, imagem:item_image, valor: preco}});
+        this.setState({item: {name: item_name, imagem: item_image, valor: preco}});
     }
 
     handleChange(e) {
@@ -68,8 +69,13 @@ class App extends Component {
     componentDidMount() {
         let self = this;
         new Promise(async function (response, reject) {
-            await self.setState(self.props.location.state);
-            response()
+            try {
+                await self.setState(self.props.location.state);
+                response()
+            }
+            catch (e) {
+                reject(e)
+            }
         }).then(function () {
             self.load_map();
         })
@@ -92,7 +98,7 @@ class App extends Component {
             //Inner loop to create children
             children.push(<td>{`_${(i + 1).toString().padStart(2, '0')}_`}</td>);
             for (let j = 0; j < size; j++) {
-                let position = this.state.map[i * size + j]
+                let position = this.state.map[i * size + j];
                 if (Math.abs(this.state.x - position.x) > this.state.view || Math.abs(this.state.y - position.y) > this.state.view) {
                     children.push(<td>{`_~~_`}</td>)
                 }
@@ -100,13 +106,14 @@ class App extends Component {
                     if (position.monster && position.monster.hasOwnProperty('name')) {
                         children.push(
                             <td style={{fontSize: '.8em'}}>
+                                // eslint-disable-next-line
                                 <a className={'hand'}
                                    onClick={() => this.atacar(position, 'monster')}>{position.monster.name.toUpperCase()}</a>
 
                             </td>);
                     }
                     else if (position.usuario && position.usuario.hasOwnProperty('name')) {
-                        if (position.x == this.state.x && position.y == this.state.y)
+                        if (position.x === this.state.x && position.y === this.state.y)
                             children.push(
                                 <td style={{fontSize: '.8em'}}>
                                     {this.state.foto.toUpperCase()}
@@ -114,12 +121,14 @@ class App extends Component {
                         else
                             children.push(
                                 <td style={{fontSize: '.8em'}}>
+                                    // eslint-disable-next-line
                                     <a className={'hand'}
                                        onClick={() => this.atacar(position, 'usuario')}>{position.usuario.foto.toUpperCase()}</a>
                                 </td>)
                     }
                     else {
                         children.push(<td>
+                            // eslint-disable-next-line
                             <a className={'hand'}
                                onClick={() => this.move(position)}>{`_.._`}</a>
                         </td>)
@@ -129,7 +138,7 @@ class App extends Component {
             //Create the parent and add the children
             table.push(<tr>{children}</tr>)
         }
-        return table
+        return table;
     }
 
     atacar(enemy, type) {
@@ -138,8 +147,6 @@ class App extends Component {
             alvo: enemy,
             type: type
         };
-        console.log(enemy)
-        let self = this;
         soap.createClient(url, function (err, client) {
             if (err) throw err;
             client.Atacar(obj, function (err, res) {
@@ -156,7 +163,6 @@ class App extends Component {
             atacante: {ataque: this.state.ataque, name: this.state.name, x: this.state.x, y: this.state.y},
             alvo: location
         };
-        let self = this;
         soap.createClient(url, function (err, client) {
             if (err) throw err;
             client.Move(obj, function (err, res) {
@@ -168,12 +174,11 @@ class App extends Component {
 
 
     comprar() {
-        var nome = this.state.name;
-        var item = this.state.item;
+        let nome = this.state.name;
+        let item = this.state.item;
         let self = this;
-        console.log("koko")
-        console.log(item)
-        let preco = item.valor
+        let preco = item.valor;
+
         if (this.state.gold < item.valor) {
             alert("vc nao tem money suficiente $$");
             this.setState({lgShow: false})
@@ -202,7 +207,7 @@ class App extends Component {
         }
     }
 
-    curaVida(){
+    curaVida() {
         var nome = this.state.name;
         let self = this;
         soap.createClient(url, function (err, client) {
@@ -220,40 +225,40 @@ class App extends Component {
 
     imprimeInventario() {
         let array = [];
-        let item = this.state.inventario
+        let item = this.state.inventario;
 
         // console.log(item)
-        if(!item) return;
-        if(!(item instanceof Array)){
-            if(item.name == 'potion'){
+        if (!item) return;
+        if (!(item instanceof Array)) {
+            if (item.name === 'potion') {
                 array.push(<li style={{paddingLeft: '3%'}}>
-                <img src={item.imagem} style={{maxWidth: '40px', maxHeight: '40px'}}/>
-                {item.name}
-                <Button bsSize="xsmall" id="btnUse" bsStyle="success" onClick={this.curaVida}> Usar </Button>
-                </li>)            
-                return array;                
-            }
-            else{
-                array.push(<li style={{paddingLeft: '3%'}}>
-                <img src={item.imagem} style={{maxWidth: '40px', maxHeight: '40px'}}/>
-                {item.name}
-                </li>)            
+                    <img src={item.imagem} style={{maxWidth: '40px', maxHeight: '40px'}} alt={item.name}/>
+                    {item.name}
+                    <Button bsSize="xsmall" id="btnUse" bsStyle="success" onClick={this.curaVida}> Usar </Button>
+                </li>);
                 return array;
-            }   
+            }
+            else {
+                array.push(<li style={{paddingLeft: '3%'}}>
+                    <img src={item.imagem} alt={item.name} style={{maxWidth: '40px', maxHeight: '40px'}}/>
+                    {item.name}
+                </li>);
+                return array;
+            }
         }
 
 
         for (let i = 0; i < item.length; i++) {
             // console.log(item[i])
             // console.log(i)
-            if(item[i].name == 'potion'){
+            if (item[i].name === 'potion') {
                 array.push(<li style={{paddingLeft: '3%'}}>
-                <img src={item[i].imagem} style={{maxWidth: '40px', maxHeight: '40px'}}/>{item[i].name}
-                <Button bsSize="xsmall" id="btnUse" bsStyle="success" onClick={this.curaVida}> Usar </Button>
+                    <img src={item[i].imagem} alt={item[i].name} style={{maxWidth: '40px', maxHeight: '40px'}}/>{item[i].name}
+                    <Button bsSize="xsmall" id="btnUse" bsStyle="success" onClick={this.curaVida}> Usar </Button>
                 </li>)
-            }else{
+            } else {
                 array.push(<li style={{paddingLeft: '3%'}}>
-                <img src={item[i].imagem} style={{maxWidth: '40px', maxHeight: '40px'}}/>{item[i].name}
+                    <img src={item[i].imagem} alt={item[i].name} style={{maxWidth: '40px', maxHeight: '40px'}}/>{item[i].name}
                 </li>)
             }
 
@@ -262,27 +267,27 @@ class App extends Component {
     }
 
     lista() {
-        let array = []
+        let array = [];
         array.push(
             <label style={{width: '50%', padding: '2%'}}><p>Preço $50</p>
-                <input type="radio" name="a" value="sword" onChange={()=>this.handleItem('sword', sword, 50)}/>
-                <img src={sword}/></label>
-        )
+                <input type="radio" name="a" value="sword" onChange={() => this.handleItem('sword', sword, 50)}/>
+                <img src={sword} alt={"Espada"}/></label>
+        );
         array.push(
             <label style={{width: '50%', padding: '2%'}}><p>Preço $50</p>
-                <input type="radio" name="a" value="pistol" onChange={()=>this.handleItem('pistol', pistol, 50)}/>
-                <img src={pistol}/></label>
-        )
+                <input type="radio" name="a" value="pistol" onChange={() => this.handleItem('pistol', pistol, 50)}/>
+                <img src={pistol} alt={'Pistola'}/></label>
+        );
         array.push(
             <label style={{width: '50%', padding: '2%'}}><p>Preço $50</p>
-                <input type="radio" name="a" value="bow" onChange={()=>this.handleItem('bow', bow, 50)}/>
-                <img src={bow}/></label>
-        )
+                <input type="radio" name="a" value="bow" onChange={() => this.handleItem('bow', bow, 50)}/>
+                <img src={bow} alt={'Arco'}/></label>
+        );
         array.push(
             <label style={{width: '50%', padding: '2%'}}><p>Preço $10</p>
-                <input type="radio" name="a" value="potion" onChange={()=>this.handleItem('potion', potion, 10)}/>
-                <img src={potion}/></label>
-        )
+                <input type="radio" name="a" value="potion" onChange={() => this.handleItem('potion', potion, 10)}/>
+                <img src={potion} alt={'Poção de cura'}/></label>
+        );
         return array
     }
 
@@ -308,8 +313,8 @@ class App extends Component {
                     <tr style={{border: '1px solid black'}}>
                         <th style={{width: '25%', border: '1px solid black', textAlign: 'center'}}>
                             <ProgressBar striped bsStyle="danger" now={this.state.life} label="Life"/>
-                            <a style={{color: 'yellow', fontSize: '20px'}}>Gold: ${this.state.gold}</a>
-                            <img src={this.state.imagem} style={{width: '100%'}}/>
+                            <var style={{color: 'yellow', fontSize: '20px'}}>Gold: ${this.state.gold}</var>
+                            <img src={this.state.imagem} alt={this.state.name} style={{width: '100%'}}/>
                         </th>
 
                         <th style={{border: '1px solid black', width: '40%', textAlign: 'center'}}>
@@ -318,7 +323,7 @@ class App extends Component {
 
                         <th style={{border: '1px solid black', width: '35%'}}>
                             <div id="caio">
-                            {this.imprimeInventario()}
+                                {this.imprimeInventario()}
 
                             </div>
                         </th>
@@ -349,38 +354,44 @@ class App extends Component {
         let obj = {name: this.state.name};
         let self = this;
         new Promise(async function (response, reject) {
+            try{
+                let redirect = 0;
+                await soap.createClient(url, function (err, client) {
+                    if (err) throw err;
+                    // interfaces
+                    client.GetMap(obj, function (err, res) {
+                        if (err) throw err;
+                        self.setState(res.map)
+                    });
+                    client.GetUser(obj, function (err, res) {
+                        if (err) throw err;
+                        if (!('name' in res.User) || self.state.life <= 0) {
+                            if (self.state.life <= 0 && redirect === 0) {
+                                alert("Você morreu")
+                            }
+                            redirect = 1;
+                            delete self.props.location.state;
+                            delete self.state.name;
 
-            let redirect = 0;
-            await soap.createClient(url, function (err, client) {
-                if (err) throw err;
-                // interfaces
-                client.GetMap(obj, function (err, res) {
-                    if (err) throw err;
-                    self.setState(res.map)
-                });
-                client.GetUser(obj, function (err, res) {
-                    if (err) throw err;
-                    if (!('name' in res.User) || self.state.life <= 0) {
-                        if (self.state.life <= 0 && redirect === 0){
-                            alert("Você morreu")
+                            self.props.history.push({pathname: '/cadastro'})
                         }
-                        redirect = 1;
-                        delete self.props.location.state;
-                        delete self.state.name;
+                        self.setState(res.User)
+                    });
+                    client.GetInventarioList(obj, function (err, res) {
+                        if (err) throw err;
 
-                        self.props.history.push({pathname: '/cadastro'})
-                    }
-                    self.setState(res.User)
+                        self.setState({inventario: res.Inventario})
+                    })
+
                 });
-                client.GetInventarioList(obj, function (err, res) {
-                    if (err) throw err;
-                    // self.setState({inventario: res.Inventario})
-                })
+                setTimeout(response, 300);
+            }
+            catch (e) {
+                reject(e)
+            }
 
-            });
-            setTimeout(response, 300);
         }).then(function () {
-            if (self.state.name){
+            if (self.state.name) {
                 self.load_map();
             }
         })
