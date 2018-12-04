@@ -171,6 +171,15 @@
         <wsdl:part name='Gold' type='xsd:int'/>
     </wsdl:message>
 
+    <wsdl:message name='CuraVidaRequest'>
+        <wsdl:part name="name" type='xsd:string'/>
+        <wsdl:part name="valor" type='xsd:int'/>
+    </wsdl:message>
+
+    <wsdl:message name='CuraVidaResponse'>
+        <wsdl:part name='Life' type='xsd:int'/>
+    </wsdl:message>
+
     <wsdl:portType name="metodos">
         <wsdl:operation name="GetMap">
             <wsdl:input message="GetMapRequest"/>
@@ -214,6 +223,11 @@
         <wsdl:operation name="RemoveGold">
             <wsdl:input message="RemoveGoldRequest"/>
             <wsdl:output message="RemoveGoldResponse"/>
+        </wsdl:operation>    
+
+        <wsdl:operation name="CuraVida">
+            <wsdl:input message="CuraVidaRequest"/>
+            <wsdl:output message="CuraVidaResponse"/>
         </wsdl:operation>        
     </wsdl:portType>
 
@@ -317,6 +331,18 @@
 
         <wsdl:operation name="RemoveGold">
             <soap:operation soapAction="RemoveGold"/>
+            <wsdl:input>
+                <soap:body use="encoded"
+                           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="encoded"
+                           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </wsdl:output>
+        </wsdl:operation>
+
+        <wsdl:operation name="CuraVida">
+            <soap:operation soapAction="CuraVida"/>
             <wsdl:input>
                 <soap:body use="encoded"
                            encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>

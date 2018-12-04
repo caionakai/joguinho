@@ -3,6 +3,8 @@
 
 const soap = require('soap');
 const http = require('http');
+var express = require('express');
+var cors = require('cors');
 
 let userList = [];
 let map = [];
@@ -98,6 +100,19 @@ function getInventario(name) {
     return []
 }
 
+// cura vida passando nome do usuario e qnt de vida a ser curada
+function restoreLife(name, valor){
+    let vidaAnterior = userList.find(x => x.name === name).life
+    userList.find(x => x.name === name).life = parseInt(vidaAnterior) + parseInt(valor)
+    let x =  userList.find(x => x.name === name).inventario
+    console.log(x[0])
+    let indice = x.indexOf(x => x.name == 'potion')
+    console.log(indice)
+    delete x[indice]
+    
+    return userList.find(x => x.name === name).life
+}
+
 let service = {
     ws: {
         funcoes: {
@@ -129,6 +144,9 @@ let service = {
             },
             RemoveGold: function (obj){
                 return {Gold: removeGold(obj.name, obj.valor) }
+            },
+            CuraVida: function (obj){
+                return {Life: restoreLife(obj.name, obj.valor)}
             }
         }
     }
@@ -136,9 +154,9 @@ let service = {
 
 const xml = require('fs').readFileSync('myservice.wsdl', 'utf8');
 
-let server = http.createServer(function (request, response) {
-    response.end("404: Not Found: " + request.url);
-});
+
+let server = express()
+server.use(cors())
 
 server.listen(8001);
 soap.listen(server, '/wscalc1', service, xml);

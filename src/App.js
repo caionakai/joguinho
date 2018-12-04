@@ -7,6 +7,7 @@ import corrin from './corrin.png';
 import sword from './sword.png';
 import pistol from './pistol.png';
 import bow from './bow.png';
+import potion from './potion.png';
 
 class App extends Component {
     constructor(props, context) {
@@ -16,7 +17,7 @@ class App extends Component {
         this.comprar = this.comprar.bind(this);
         this.load_map = this.load_map.bind(this);
         this.render_map = this.render_map.bind(this);
-        this.verificaItemImage = this.verificaItemImage.bind(this);
+        this.curaVida = this.curaVida.bind(this);
         this.state = {
             name: 'None',
             x: '--',
@@ -32,8 +33,8 @@ class App extends Component {
         }
     }
 
-    handleItem(item_name, item_image) {
-        this.setState({item: {name:item_name, imagem:item_image}});
+    handleItem(item_name, item_image, preco) {
+        this.setState({item: {name:item_name, imagem:item_image, valor: preco}});
     }
 
     handleChange(e) {
@@ -154,25 +155,6 @@ class App extends Component {
         })
     }
 
-    verificaItemImage(nomeItem) {
-        switch (nomeItem) {
-            case 'sword': {
-                this.setState({imgItem: sword});
-                break;
-            }
-            case 'pistol': {
-                this.setState({imgItem: pistol});
-                break;
-            }
-            case 'bow': {
-                this.setState({imgItem: bow});
-                break;
-            }
-            default: {
-                this.setState({imgItem: null})
-            }
-        }
-    }
 
     comprar() {
         var soap = require('soap-everywhere');
@@ -180,7 +162,10 @@ class App extends Component {
         var nome = this.state.name;
         var item = this.state.item;
         let self = this;
-        if (this.state.gold < 50) {
+        console.log("koko")
+        console.log(item)
+        let preco = item.valor
+        if (this.state.gold < item.valor) {
             alert("vc nao tem money suficiente $$");
             this.setState({lgShow: false})
         }
@@ -196,7 +181,7 @@ class App extends Component {
                         inventario: res.Inventario
                     });
                 });
-                client.RemoveGold({name: nome, valor: 50}, function (err, res) {
+                client.RemoveGold({name: nome, valor: preco}, function (err, res) {
                     if (err) throw err;
                     console.log(res);
                     self.setState({
@@ -205,31 +190,64 @@ class App extends Component {
                 });
 
             });
-            this.verificaItemImage(item)
             this.setState({lgShow: false})
         }
+    }
+
+    curaVida(){
+        var soap = require('soap-everywhere');
+        var url = 'http://localhost:8001/wscalc1?wsdl';
+        var nome = this.state.name;
+        soap.createClient(url, function (err, client) {
+            if (err) throw err;
+
+
+            client.CuraVida({name: nome, valor: 10}, function (err, res) {
+                if (err) throw err;
+                console.log("essa eh a vida agora")
+                console.log(res);
+            });
+        });
     }
 
     imprimeInventario() {
         let array = [];
         let item = this.state.inventario
 
-        console.log(item)
+        // console.log(item)
         if(!item) return;
         if(!(item instanceof Array)){
-            array.push(<li style={{paddingLeft: '3%'}}><img src={item.imagem}
-                                                            style={{maxWidth: '40px', maxHeight: '40px'}}/>{item.name}
-            </li>)            
-            return array;
+            if(item.name == 'potion'){
+                array.push(<li style={{paddingLeft: '3%'}}>
+                <img src={item.imagem} style={{maxWidth: '40px', maxHeight: '40px'}}/>
+                {item.name}
+                <Button bsSize="xsmall" id="btnUse" bsStyle="success" onClick={this.curaVida}> Usar </Button>
+                </li>)            
+                return array;                
+            }
+            else{
+                array.push(<li style={{paddingLeft: '3%'}}>
+                <img src={item.imagem} style={{maxWidth: '40px', maxHeight: '40px'}}/>
+                {item.name}
+                </li>)            
+                return array;
+            }   
         }
+
 
         for (let i = 0; i < item.length; i++) {
             console.log(item[i])
             // console.log(i)
-
-            array.push(<li style={{paddingLeft: '3%'}}><img src={item[i].imagem}
-                                                            style={{maxWidth: '40px', maxHeight: '40px'}}/>{item[i].name}
-            </li>)
+            if(item[i].name == 'potion'){
+                array.push(<li style={{paddingLeft: '3%'}}>
+                <img src={item[i].imagem} style={{maxWidth: '40px', maxHeight: '40px'}}/>{item[i].name}
+                <Button bsSize="xsmall" id="btnUse" bsStyle="success" onClick={this.curaVida}> Usar </Button>
+                </li>)
+            }else{
+                array.push(<li style={{paddingLeft: '3%'}}>
+                <img src={item[i].imagem} style={{maxWidth: '40px', maxHeight: '40px'}}/>{item[i].name}
+                </li>)
+            }
 
         }
         return array
@@ -239,18 +257,23 @@ class App extends Component {
         let array = []
         array.push(
             <label style={{width: '50%', padding: '2%'}}><p>Preço $50</p>
-                <input type="radio" name="a" value="sword" onChange={()=>this.handleItem('sword', sword)}/>
+                <input type="radio" name="a" value="sword" onChange={()=>this.handleItem('sword', sword, 50)}/>
                 <img src={sword}/></label>
         )
         array.push(
             <label style={{width: '50%', padding: '2%'}}><p>Preço $50</p>
-                <input type="radio" name="a" value="pistol" onChange={()=>this.handleItem('pistol', pistol)}/>
+                <input type="radio" name="a" value="pistol" onChange={()=>this.handleItem('pistol', pistol, 50)}/>
                 <img src={pistol}/></label>
         )
         array.push(
             <label style={{width: '50%', padding: '2%'}}><p>Preço $50</p>
-                <input type="radio" name="a" value="bow" onChange={()=>this.handleItem('bow', bow)}/>
+                <input type="radio" name="a" value="bow" onChange={()=>this.handleItem('bow', bow, 50)}/>
                 <img src={bow}/></label>
+        )
+        array.push(
+            <label style={{width: '50%', padding: '2%'}}><p>Preço $10</p>
+                <input type="radio" name="a" value="potion" onChange={()=>this.handleItem('potion', potion, 10)}/>
+                <img src={potion}/></label>
         )
         return array
     }
@@ -286,10 +309,10 @@ class App extends Component {
                         </th>
 
                         <th style={{border: '1px solid black', width: '35%'}}>
-                            <center>
-
-                            </center>
+                            <div id="caio">
                             {this.imprimeInventario()}
+
+                            </div>
                         </th>
                     </tr>
                 </table>
