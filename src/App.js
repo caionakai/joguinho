@@ -8,6 +8,9 @@ import sword from './sword.png';
 import pistol from './pistol.png';
 import bow from './bow.png';
 import potion from './potion.png';
+const ip =require('ip').address();
+const url = 'http://'+ip+':8001/wscalc1?wsdl';
+const soap = require('soap-everywhere');
 
 class App extends Component {
     constructor(props, context) {
@@ -19,7 +22,7 @@ class App extends Component {
         this.render_map = this.render_map.bind(this);
         this.curaVida = this.curaVida.bind(this);
         this.state = {
-            name: 'None',
+            name: '',
             x: '--',
             y: '--',
             view: 0,
@@ -94,7 +97,15 @@ class App extends Component {
                     children.push(<td>{`_~~_`}</td>)
                 }
                 else {
-                    if ('usuario' in this.state.map[i * size + j]) {
+                    if (position.monster && position.monster.hasOwnProperty('name')) {
+                        children.push(
+                            <td style={{fontSize: '.8em'}}>
+                                <a className={'hand'}
+                                   onClick={() => this.atacar(position, 'monster')}>{position.monster.name.toUpperCase()}</a>
+
+                            </td>);
+                    }
+                    else if (position.usuario && position.usuario.hasOwnProperty('name')) {
                         if (position.x == this.state.x && position.y == this.state.y)
                             children.push(
                                 <td style={{fontSize: '.8em'}}>
@@ -104,7 +115,7 @@ class App extends Component {
                             children.push(
                                 <td style={{fontSize: '.8em'}}>
                                     <a className={'hand'}
-                                       onClick={() => this.atacar(position.usuario)}>{position.usuario.foto.toUpperCase()}</a>
+                                       onClick={() => this.atacar(position, 'usuario')}>{position.usuario.foto.toUpperCase()}</a>
                                 </td>)
                     }
                     else {
@@ -121,13 +132,13 @@ class App extends Component {
         return table
     }
 
-    atacar(enemy) {
-        const soap = require('soap-everywhere');
-        const url = 'http://localhost:8001/wscalc1?wsdl';
+    atacar(enemy, type) {
         let obj = {
             atacante: {ataque: this.state.ataque, name: this.state.name, x: this.state.x, y: this.state.y},
-            alvo: enemy
+            alvo: enemy,
+            type: type
         };
+        console.log(enemy)
         let self = this;
         soap.createClient(url, function (err, client) {
             if (err) throw err;
@@ -139,8 +150,8 @@ class App extends Component {
     }
 
     move(location) {
-        const soap = require('soap-everywhere');
-        const url = 'http://localhost:8001/wscalc1?wsdl';
+
+
         let obj = {
             atacante: {ataque: this.state.ataque, name: this.state.name, x: this.state.x, y: this.state.y},
             alvo: location
@@ -157,8 +168,6 @@ class App extends Component {
 
 
     comprar() {
-        var soap = require('soap-everywhere');
-        var url = 'http://localhost:8001/wscalc1?wsdl';
         var nome = this.state.name;
         var item = this.state.item;
         let self = this;
@@ -176,7 +185,6 @@ class App extends Component {
 
                 client.AddInventario({name: nome, item: item}, function (err, res) {
                     if (err) throw err;
-                    console.log(res);
                     self.setState({
                         inventario: res.Inventario
                     });
@@ -195,17 +203,17 @@ class App extends Component {
     }
 
     curaVida(){
-        var soap = require('soap-everywhere');
-        var url = 'http://localhost:8001/wscalc1?wsdl';
         var nome = this.state.name;
+        let self = this;
         soap.createClient(url, function (err, client) {
             if (err) throw err;
 
 
             client.CuraVida({name: nome, valor: 10}, function (err, res) {
                 if (err) throw err;
-                console.log("essa eh a vida agora")
-                console.log(res);
+                self.setState({
+                    inventario: res.Inventario
+                });
             });
         });
     }
@@ -236,7 +244,7 @@ class App extends Component {
 
 
         for (let i = 0; i < item.length; i++) {
-            console.log(item[i])
+            // console.log(item[i])
             // console.log(i)
             if(item[i].name == 'potion'){
                 array.push(<li style={{paddingLeft: '3%'}}>
@@ -338,34 +346,46 @@ class App extends Component {
     }
 
     load_map() {
-        const soap = require('soap-everywhere');
-        const url = 'http://localhost:8001/wscalc1?wsdl';
         let obj = {name: this.state.name};
         let self = this;
-        soap.createClient(url, function (err, client) {
-            if (err) throw err;
-            // interfaces
-            client.GetMap(obj, function (err, res) {
-                if (err) throw err;
-                self.setState(res.map)
-            });
-            client.GetUser(obj, function (err, res) {
-                if (err) throw err;
-                if (!('name' in res.User)) {
-                    console.log('redirect');
-                    self.props.history.push({pathname: '/cadastro'});
-                }
-                self.setState(res.User)
-            });
-            client.GetInventarioList(obj, function (err, res) {
-                if (err) throw err;
-                // console.log(res.Inventario.Inventario.name)
-                self.setState({inventario: res.Inventario.Inventario})
-            })
+        new Promise(async function (response, reject) {
 
-        });
-        setTimeout(this.load_map, 1000);
+            let redirect = 0;
+            await soap.createClient(url, function (err, client) {
+                if (err) throw err;
+                // interfaces
+                client.GetMap(obj, function (err, res) {
+                    if (err) throw err;
+                    self.setState(res.map)
+                });
+                client.GetUser(obj, function (err, res) {
+                    if (err) throw err;
+                    if (!('name' in res.User) || self.state.life <= 0) {
+                        if (self.state.life <= 0 && redirect === 0){
+                            alert("Você morreu")
+                        }
+                        redirect = 1;
+                        delete self.props.location.state;
+                        delete self.state.name;
+
+                        self.props.history.push({pathname: '/cadastro'})
+                    }
+                    self.setState(res.User)
+                });
+                client.GetInventarioList(obj, function (err, res) {
+                    if (err) throw err;
+                    // self.setState({inventario: res.Inventario})
+                })
+
+            });
+            setTimeout(response, 300);
+        }).then(function () {
+            if (self.state.name){
+                self.load_map();
+            }
+        })
     }
 }
 
 export default App;
+export {url};

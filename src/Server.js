@@ -1,95 +1,169 @@
-/*jslint node: true */
-"use strict";
+// /*jslint node: true */
+// "use strict";
 
+const ip =require('ip').address();
 const soap = require('soap');
-const http = require('http');
-var express = require('express');
-var cors = require('cors');
+const express = require('express');
+const cors = require('cors');
 
-let userList = [];
-let map = [];
+let Map = {
+    map: [],
+    create: function () {
+        for (let i = 0; i < 15; i++) {
+            for (let j = 0; j < 15; j++) {
+                this.map.unshift({x: i, y: j})
+            }
+        }
+        for(let i=0;i< 5;i++)
+            this.add_monster({
+                name: 'Wolf',
+                life: 100,
+                gold: 10,
+                inventario: [],
+                ataque: 10
+            })
+        for(let i=0;i< 5;i++)
+            this.add_monster({
+                name: 'Bat',
+                life: 50,
+                gold: 5,
+                inventario: [],
+                ataque: 10
+            })
+        for(let i=0;i< 5;i++)
+            this.add_monster({
+                name: 'Spider',
+                life: 200,
+                gold: 30,
+                inventario: [],
+                ataque: 25
+            })
+    },
+    add_monster: function (monster){
+        let position = Map.clear();
+        this.load_location(position.x, position.y).monster = monster
+    },
+    load: function () {
+        return this.map
+    },
+    add_user: function (user) {
+        this.load_location(user.x,user.y).usuario = user
+    },
+    load_location: function (x,y) { // get usuario
+        return this.map.find( obj => obj.x == x && obj.y == y)
+    },
+    clear: function () {
+        let len =  Math.sqrt(Map.map.length);
+        let position = Map.load_location(Math.floor((Math.random() * len)), Math.floor((Math.random() * len)));
+        while (position.usuario || position.monster){
+            position = Map.load_location(Math.floor((Math.random() * len)), Math.floor((Math.random() * len)))
+        }
+        return position
+    }
+};
+let User = {
+    userList: [],
+    create: function (name, foto) {
+        let position = Map.clear();
+        let user = { // funcao para criar usuario
+            name: name,
+            x: position.x,
+            y: position.y,
+            foto: foto,
+            view: 2,
+            inventario: [],
+            gold: 150,
+            life: 100,
+            ataque: 20
+        };
+        this.userList.push(user);
+        Map.add_user(user);
+        return user;
+    },
+    load_name: function (name) { // get usuario
+        return this.userList.find( x => x.name === name)
+    },
+    load_location: function (x,y) { // get usuario
+        return this.userList.find( obj => obj.x == x && obj.y == y)
+    },
+    remove: function (x,y){
+        delete Map.load_location(x, y).usuario;
+        let i = this.userList.findIndex(obj => obj.x == x && obj.y == y);
+        this.userList.splice(i,1);
+    },
+    remove_gold: function (name, valor) {// tira dinheiro do usuario
+        let user = this.load_name(name);
+        user.gold -= valor;
+        return user.gold
+    },
+    atacar: function (obj) {
+        let atacante = this.load_location(obj.atacante.x, obj.atacante.y);
+        switch (obj.type) {
+            case 'usuario':{
+                let alvo = this.load_location(obj.alvo.x, obj.alvo.y);
 
-function create_map() {
-    for (let i = 0; i < 15; i++) {
-        for (let j = 0; j < 15; j++) {
-            map.unshift({x: i, y: j})
+                alvo.life -= atacante.ataque;
+                console.log(`Atacando usuario ${alvo.name} vida ~ ${alvo.life}`);
+                if(alvo.life <= 0){
+                    atacante.gold += alvo.gold;
+                    atacante.inventario.concat(alvo.inventario);
+                    this.remove(obj.alvo.x,obj.alvo.y)
+                }
+                return alvo
+            }
+            case 'monster':{
+
+                let alvo = Map.load_location(obj.alvo.x, obj.alvo.y).monster;
+                alvo.life -= atacante.ataque;
+                atacante.life -= alvo.ataque;
+                console.log(`Atacando monstro vida ~ ${alvo.life}`);
+                if(alvo.life <= 0){
+                    atacante.gold += alvo.gold;
+                    atacante.inventario.concat(alvo.inventario);
+                    delete Map.load_location(obj.alvo.x, obj.alvo.y).monster
+                }
+                else if(atacante.life <=0){
+                    alvo.inventario.concat(atacante.inventario);
+                    alvo.gold = atacante.gold
+                    this.remove(obj.atacante.x,obj.atacante.y);
+                }
+                return alvo
+            }
+        }
+
+    },
+    move: function (obj) {
+        let position_alvo = Map.load_location(obj.atacante.x, obj.atacante.y);
+        delete position_alvo.usuario;
+
+        position_alvo = Map.load_location(obj.alvo.x, obj.alvo.y);
+        let user = this.load_location(obj.atacante.x, obj.atacante.y);
+        user.x = position_alvo.x;
+        user.y = position_alvo.y;
+        position_alvo.usuario = user;
+        return user
+    },
+    add_item: function (name, item) { // adiciona item no inventario passando nome do usuario e o item
+        this.load_name(name).inventario.push(item)
+    },
+    delete_item: function (name, item_name) {
+        let i = this.load_name(name).inventario.findIndex(item => item.name == item_name)
+        this.load_name(name).inventario.splice(i,1)
+    },
+    use_item: function (name, item_name, valor) {
+        switch (item_name) {
+            case 'potion':{// cura vida passando nome do usuario e qnt de vida a ser curada
+                let x =this.load_name(name);
+                x.life += parseInt(valor);
+                this.delete_item(name,item_name);
+                return x.life
+            }
         }
     }
-}
+};
+Map.create();
+let userList = [];
 
-create_map();
-
-function load_map(user) {
-    return map
-}
-function map_add_user(user) {
-    let x = map.findIndex( posi=> posi.x === user.x && posi.y === user.y )
-    map[x].usuario = user;
-}
-// funcao para criar usuario
-function createUser(name, foto) {
-    // generate two random numbers to define the position of the user in the map
-    let map_x = Math.floor((Math.random() * Math.sqrt(map.length)));
-    let map_y = Math.floor((Math.random() * Math.sqrt(map.length)));
-    let inventario = [];
-    let gold = 150;
-    let life = 100;
-    // user object
-    let user = {
-        name: name,
-        x: map_x,
-        y: map_y,
-        foto: foto,
-        view: 2,
-        inventario: inventario,
-        gold: gold,
-        life: life,
-        ataque: 20
-
-    };
-    map_add_user(user);
-    userList.unshift(user);
-    return user;
-}
-
-// get usuario
-function getUser(name) {
-    return userList.find(x => x.name === name);
-}
-
-// tira dinheiro do usuario
-function removeGold(name ,valor){
-    let dinheiro = userList.find(x => x.name === name).gold;
-    userList.find(x => x.name === name).gold = dinheiro - valor;
-
-    return  userList.find(x => x.name === name).gold
-}
-function ataque(obj) {
-    let x = userList.filter(x => obj.atacante.x == x.x && obj.atacante.y == x.y)
-    let y = userList.filter(x => obj.alvo.x == x.x && obj.alvo.y == x.y)
-    y[0].life -= x[0].ataque;
-    if (y[0].life <= 0){
-        let pos = map.filter(po => po.x == obj.alvo.x && po.y == obj.alvo.y);
-        delete pos[0].usuario
-    }
-    return y[0]
-}
-function move(obj) {
-    let pos = map.filter(po => po.x == obj.atacante.x && po.y == obj.atacante.y);
-    delete pos[0].usuario;
-    pos = map.filter(po => po.x == obj.alvo.x && po.y == obj.alvo.y);
-    let i = userList.findIndex(x => obj.atacante.x == x.x && obj.atacante.y == x.y);
-    userList[i].x = obj.alvo.x;
-    userList[i].y = obj.alvo.y;
-    pos[0].usuario = userList[i];
-    return userList[i]
-}
-
-// adiciona item no inventario passando nome do usuario e o item
-function addInventario(name, item) {
-    let user = getUser(name);
-    user.inventario.unshift(item)
-}
 
 // get inventario passando nome do usuario
 function getInventario(name) {
@@ -99,64 +173,49 @@ function getInventario(name) {
 
     return []
 }
-
-// cura vida passando nome do usuario e qnt de vida a ser curada
-function restoreLife(name, valor){
-    let vidaAnterior = userList.find(x => x.name === name).life
-    userList.find(x => x.name === name).life = parseInt(vidaAnterior) + parseInt(valor)
-    let x =  userList.find(x => x.name === name).inventario
-    console.log(x[0])
-    let indice = x.indexOf(x => x.name == 'potion')
-    console.log(indice)
-    delete x[indice]
-    
-    return userList.find(x => x.name === name).life
-}
-
 let service = {
     ws: {
         funcoes: {
             GetUser: function (obj) {
-                return {User: getUser(obj.name)}
+                return {User: User.load_name(obj.name)}
             },
             GetUserList: function (name) {
                 return {Users: userList}
             },
             Atacar: function(obj){
-              return ataque(obj)
+              return User.atacar(obj)
             },
             Move: function(obj){
-              return move(obj)
+              return User.move(obj)
             },
             GetMap: function (obj) {
-                let x = getUser(obj.name);
-                return {map: load_map(x)}
+                return {map: Map.load()}
             },
             CreateUser: function (obj) {
-                return {User: createUser(obj.name, obj.foto)}
+                return {User: User.create(obj.name, obj.foto)}
             },
             GetInventarioList: function (obj) {
-                return {Inventario:getInventario(obj.name)}
+                return {Inventario:User.load_name(obj.name).inventario}
             },
             AddInventario: function (obj) {
-                addInventario(obj.name, obj.item);
-                return {Inventario: getInventario(obj.name)}
+                User.add_item(obj.name, obj.item);
+                return {Inventario: User.load_name(obj.name).inventario}
             },
             RemoveGold: function (obj){
-                return {Gold: removeGold(obj.name, obj.valor) }
+                return {Gold: User.remove_gold(obj.name, obj.valor) }
             },
             CuraVida: function (obj){
-                return {Life: restoreLife(obj.name, obj.valor)}
+                User.use_item(obj.name,'potion', obj.valor);
+                return {Inventario: User.load_name(obj.name).inventario}
             }
         }
     }
 };
 
-const xml = require('fs').readFileSync('myservice.wsdl', 'utf8');
-
-
-let server = express()
-server.use(cors())
+let xml = require('fs').readFileSync('myservice.wsdl', 'utf8');
+xml = xml.replace('localhost', ip);
+let server = express();
+server.use(cors());
 
 server.listen(8001);
 soap.listen(server, '/wscalc1', service, xml);

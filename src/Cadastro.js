@@ -4,6 +4,7 @@ import './Cadastro.css';
 import saber from './saber.png';
 import archer from './archer.png';
 import corrin from './corrin.png';
+import {url} from "./App";
 
 class Cadastro extends React.Component {
     constructor(props, context) {
@@ -33,7 +34,6 @@ class Cadastro extends React.Component {
 
     msgServidor() {
         var soap = require('soap-everywhere');
-        var url = 'http://localhost:8001/wscalc1?wsdl';
         var nome = this.state.nome;
         var props = this.props
         var foto = this.state.selecionado

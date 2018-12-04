@@ -120,6 +120,7 @@
     <wsdl:message name='AtacarRequest'>
         <wsdl:part name='Atacante' type='typens:User'/>
         <wsdl:part name='Alvo' type='typens:User'/>
+        <wsdl:part name='type' type='xsd:string'/>
     </wsdl:message>
     <wsdl:message name='AtacarResponse'>
         <wsdl:part name='Enemy' type='typens:User'/>
