@@ -221,7 +221,7 @@ class App extends Component {
     }
 
     inventario_item(item) {
-        let attr = <ListGroup header={item.name} onClick={()=>this.use_item(item)}>
+        let attr = <ListGroup header={item.name} href="#" onClick={()=>this.use_item(item)}>
             {item.ataque? `Dano ${item.ataque}`: `Cura ${item.cura}`}
         </ListGroup>;
         return (
