@@ -79,16 +79,14 @@ let User = {
     create: function (obj) {
         let position = Map.clear();
         let user = { // funcao para criar usuario
-            name: obj.name,
             x: position.x,
             y: position.y,
-            foto: obj.foto,
-            imagem: obj.imagem,
             view: 2,
             inventario: [],
             gold: 150,
             life: 100,
-            ataque: 20
+            ataque: 20,
+            ...obj
         };
         this.userList.push(user);
         Map.add_user(user);
@@ -128,12 +126,11 @@ let User = {
                 if (atacante.turn){
                     let item = {ataque: 0};
                     if (obj.item){
-                        console.log({'name':obj.atacante.name, 'item':obj.item});
                         item = this.use_item(obj.atacante.name, obj.item);
-                        console.log(item);
                     }
-
-                    alvo.life -= atacante.ataque + item.ataque;
+                    if(!(obj.item && obj.item.cura >0)){
+                        alvo.life -= atacante.ataque + item.ataque;
+                    }
                     alvo.turn = true;
                     atacante.turn = false;
                     console.log(`Atacando usuario ${alvo.name} vida ~ ${alvo.life}`);
@@ -258,7 +255,7 @@ let service = {
 };
 
 let xml = require('fs').readFileSync('myservice.wsdl', 'utf8');
-xml = xml.replace('localhost', ip);
+// xml = xml.replace('localhost', ip);
 let server = express();
 
 server.use(cors());

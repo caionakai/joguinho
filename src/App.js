@@ -1,9 +1,7 @@
 import React, {Component} from 'react';
 import './App.css';
 import {Button, Modal, ProgressBar, ListGroupItem, ListGroup, Table, Panel, Row, Col, Grid} from 'react-bootstrap';
-import saber from './saber.png';
-import archer from './archer.png';
-import corrin from './corrin.png';
+import skull from './skull.png';
 import sword from './sword.png';
 import pistol from './pistol.png';
 import bow from './bow.png';
@@ -11,7 +9,7 @@ import potion from './potion.png';
 import {confirmAlert} from "react-confirm-alert";
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
 const ip = require('ip').address();
-const url = 'http://' + ip + ':8001/wscalc1?wsdl';
+const url = 'http://192.168.1.2:8001/wscalc1?wsdl';
 const soap = require('soap-everywhere');
 
 class App extends Component {
@@ -361,9 +359,9 @@ class App extends Component {
 
                 <Modal bsSize="large"
                        aria-labelledby="contained-modal-title-sm"
-                       show={this.state.user.duel} onHide={lgClose}
+                       show={this.state.user.duel}
                 >
-                    <Modal.Header closeButton>
+                    <Modal.Header>
                         <Modal.Title id="contained-modal-title-sm">
                             <center>Duelo
                                 {' '}
@@ -391,7 +389,7 @@ class App extends Component {
                                             Ataque base: {this.state.user.ataque}
                                         </ListGroupItem>
                                         <ListGroupItem>
-                                            classe: {this.state.user.foto}
+                                            Classe: {this.state.user.foto}
                                         </ListGroupItem>
                                         <ListGroupItem>
                                             <Grid style={{width: '100%'}}>
@@ -418,13 +416,13 @@ class App extends Component {
                                             Ataque base: {this.state.enemy.ataque}
                                         </ListGroupItem>
                                         <ListGroupItem>
-                                            classe: {this.state.enemy.foto}
+                                            Classe: {this.state.enemy.foto}
                                         </ListGroupItem>
                                         <ListGroupItem>
                                             <Grid style={{width: '100%'}}>
                                                 <Row className="show-grid">
                                                     {this.batalha(this.state.user,
-                                                        this.state.enemy.inventario,
+                                                        null,
                                                         true)}
                                                 </Row>
                                             </Grid>
@@ -447,8 +445,8 @@ class App extends Component {
         let self = this;
         this.setState({user:{}});
         await confirmAlert({
-            title: 'Você morreu!!',
-            message: 'Deseja criar novo personagem?',
+            title: <center>Você morreu!!</center>,
+            message: <center>Deseja criar outro personagem? <img src={skull}/></center>,
             buttons: [
                 {
                     label: 'Sim',
@@ -471,7 +469,6 @@ class App extends Component {
         let self = this;
         new Promise(async function (response, reject) {
             try {
-                let redirect = 0;
                 await soap.createClient(url, function (err, client) {
                     if (err) throw err;
                     // interfaces
@@ -487,7 +484,6 @@ class App extends Component {
                     client.GetUser(obj, function (err, res) {
                         if (err) throw err;
                         if (!('name' in res.User) || res.User.life <= 0) {
-                            redirect = 1;
                             delete self.state.user.duel;
                             delete self.state.user.turn;
                             self.morreu()
