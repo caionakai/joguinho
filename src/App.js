@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import './App.css';
-import {Button, Modal, ProgressBar, ListGroupItem, ListGroup} from 'react-bootstrap';
+import {Button, Modal, ProgressBar, ListGroupItem, ListGroup, Table, Panel, Row, Col, Grid} from 'react-bootstrap';
 import saber from './saber.png';
 import archer from './archer.png';
 import corrin from './corrin.png';
@@ -22,44 +22,20 @@ class App extends Component {
         this.load_map = this.load_map.bind(this);
         this.render_map = this.render_map.bind(this);
         this.use_item = this.use_item.bind(this);
+        this.load_position = this.load_position.bind(this);
         this.state = {
-            name: '',
-            x: '--',
-            y: '--',
-            view: 0,
+            user: {},
             item: '',
             map: [],
             imagem: null,
             lgShow: false,
-            inventario: [],
-            gold: 0,
-            imgItem: ''
+            imgItem: '',
+            enemy: ''
         }
     }
 
     handleItem(obj) {
         this.setState({item: obj});
-    }
-
-    componentDidUpdate() {
-        if (!this.state.imagem)
-            switch (this.state.foto) {
-                case 'corrin': {
-                    this.setState({imagem: corrin});
-                    break;
-                }
-                case 'saber': {
-                    this.setState({imagem: saber});
-                    break;
-                }
-                case 'archer': {
-                    this.setState({imagem: archer});
-                    break;
-                }
-                default: {
-                    this.setState({imagem: 'oi'})
-                }
-            }
     }
 
     componentDidMount() {
@@ -78,6 +54,12 @@ class App extends Component {
 
     }
 
+    load_position(x, y) {
+        return this.state.map.find(position => {
+            return position.x == x && position.y == y
+        })
+    };
+
     render_map() {
         let table = [];
 
@@ -94,8 +76,8 @@ class App extends Component {
             //Inner loop to create children
             children.push(<td>{`_${(i + 1).toString().padStart(2, '0')}_`}</td>);
             for (let j = 0; j < size; j++) {
-                let position = this.state.map[i * size + j];
-                if (Math.abs(this.state.x - position.x) > this.state.view || Math.abs(this.state.y - position.y) > this.state.view) {
+                let position = this.load_position(i, j);
+                if (Math.abs(this.state.user.x - position.x) > this.state.user.view || Math.abs(this.state.user.y - position.y) > this.state.user.view) {
                     children.push(<td>{`_~~_`}</td>)
                 }
                 else {
@@ -110,10 +92,10 @@ class App extends Component {
                             </td>);
                     }
                     else if (position.usuario && position.usuario.hasOwnProperty('name')) {
-                        if (position.x === this.state.x && position.y === this.state.y)
+                        if (position.x === this.state.user.x && position.y === this.state.user.y)
                             children.push(
                                 <td style={{fontSize: '.8em'}}>
-                                    {this.state.foto.toUpperCase()}
+                                    {this.state.user.foto.toUpperCase()}
                                 </td>);
                         else {
                             // eslint-disable-next-line
@@ -139,10 +121,11 @@ class App extends Component {
         return table;
     }
 
-    atacar(enemy, type) {
+    atacar(enemy, type, item = null) {
         let obj = {
-            atacante: {ataque: this.state.ataque, name: this.state.name, x: this.state.x, y: this.state.y},
+            atacante: this.state.user,
             alvo: enemy,
+            item: item,
             type: type
         };
         soap.createClient(url, function (err, client) {
@@ -158,7 +141,12 @@ class App extends Component {
 
 
         let obj = {
-            atacante: {ataque: this.state.ataque, name: this.state.name, x: this.state.x, y: this.state.y},
+            atacante: {
+                ataque: this.state.user.ataque,
+                name: this.state.user.name,
+                x: this.state.user.x,
+                y: this.state.user.y
+            },
             alvo: location
         };
         soap.createClient(url, function (err, client) {
@@ -172,12 +160,12 @@ class App extends Component {
 
 
     comprar() {
-        let nome = this.state.name;
+        let nome = this.state.user.name;
         let item = this.state.item;
         let self = this;
         let preco = item.valor;
 
-        if (this.state.gold < item.valor) {
+        if (this.state.user.gold < item.valor) {
             alert("vc nao tem money suficiente $$");
             this.setState({lgShow: false})
         }
@@ -206,8 +194,9 @@ class App extends Component {
     }
 
     use_item(item) {
-        var nome = this.state.name;
+        var nome = this.state.user.name;
         let self = this;
+        console.log(item);
         soap.createClient(url, function (err, client) {
             if (err) throw err;
 
@@ -223,7 +212,7 @@ class App extends Component {
 
     inventario_item(item) {
         let attr = <ListGroup header={item.name} href="#" onClick={() => this.use_item(item)}>
-            {item.ataque ? `Dano ${item.ataque}` : `Cura ${item.cura}`}
+            {(item.ataque && item.ataque > 0) ? `Dano ${item.ataque}` : `Cura ${item.cura}`}
         </ListGroup>;
         return (
             <ListGroupItem>
@@ -237,7 +226,7 @@ class App extends Component {
 
     imprimeInventario() {
         let array = [];
-        let item = this.state.inventario;
+        let item = this.state.user.inventario;
 
         // console.log(item)
         if (!item) return;
@@ -274,11 +263,46 @@ class App extends Component {
         array.push(
             <label style={{width: '50%', padding: '2%'}}><p>Preço $10</p>
                 <input type="radio" name="a" value="potion"
-                       onChange={() => this.handleItem({name: 'potion', imagem: potion, valor: 10, cura: 30})}/>
+                       onChange={() => this.handleItem({
+                           name: 'potion',
+                           imagem: potion,
+                           valor: 10,
+                           ataque: 0,
+                           cura: 30
+                       })}/>
                 <img src={potion} alt={'Poção de cura'}/></label>
         );
         return array
     }
+
+    batalha = (enemy, inventario, disabled) => {
+        let count = {};
+        let count2 = {};
+        count['Ataque basico'] = {};
+        if (inventario) {
+            if (!(inventario instanceof Array)) {
+                inventario = [inventario]
+            }
+            inventario.forEach(function (i) {
+                count[i.name] = i;
+                count2[i.name] = (count2[i.name] || 0) + 1;
+            });
+        }
+        let keys = Object.keys(count);
+        let position = this.load_position(enemy.x, enemy.y);
+        return keys.map(key => {
+            return (
+
+                <Col sm={4}>
+                    <center>
+                        <Button className="btn btn-xs btn-block"
+                                disabled={disabled}
+                                onClick={() => this.atacar(position, 'duel', count[key])}> {key} [{count2[key] || '∞'}]</Button>
+                    </center>
+                </Col>
+            )
+        });
+    };
 
     render() {
         let lgClose = () => this.setState({lgShow: false});
@@ -287,7 +311,8 @@ class App extends Component {
 
                 <table style={{width: '80%', marginLeft: '10%'}}>
                     <tr style={{border: '1px solid black'}}>
-                        <td style={{border: '1px solid black', textAlign: 'center'}}><h4>Nome: {this.state.name}</h4>
+                        <td style={{border: '1px solid black', textAlign: 'center'}}>
+                            <h4>Nome: {this.state.user.name}</h4>
                         </td>
                         <td style={{border: '1px solid black', fontWeight: 'bold', textAlign: 'center'}}>MAPA</td>
                         <td style={{
@@ -301,9 +326,9 @@ class App extends Component {
                     </tr>
                     <tr style={{border: '1px solid black'}}>
                         <th style={{width: '25%', border: '1px solid black', textAlign: 'center'}}>
-                            <ProgressBar striped bsStyle="danger" now={this.state.life} label="Life"/>
-                            <var style={{color: 'yellow', fontSize: '20px'}}>Gold: ${this.state.gold}</var>
-                            <img src={this.state.imagem} alt={this.state.name} style={{width: '100%'}}/>
+                            <ProgressBar striped bsStyle="danger" now={this.state.user.life} label="Life"/>
+                            <var style={{color: 'yellow', fontSize: '20px'}}>Gold: ${this.state.user.gold}</var>
+                            <img src={this.state.user.imagem} alt={this.state.user.name} style={{width: '100%'}}/>
                         </th>
 
                         <th style={{border: '1px solid black', width: '40%', textAlign: 'center'}}>
@@ -334,12 +359,93 @@ class App extends Component {
                     </Modal.Footer>
                 </Modal>
 
+                <Modal bsSize="large"
+                       aria-labelledby="contained-modal-title-sm"
+                       show={this.state.user.duel} onHide={lgClose}
+                >
+                    <Modal.Header closeButton>
+                        <Modal.Title id="contained-modal-title-sm">
+                            <center>Duelo
+                                {' '}
+                                <var style={{color: 'red'}}>{this.state.user.name}[{this.state.user.foto}]</var>
+                                {' contra '}
+                                <var style={{color: 'red'}}>{this.state.enemy.name}[{this.state.enemy.foto}]</var>
+                                {' '}
+                            </center>
+                        </Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Table>
+                            <tr>
+                                <td style={{width: '50%', padding: '2px'}}>
+                                    <ListGroup>
+                                        <ListGroupItem>
+                                            <ProgressBar striped bsStyle="danger"
+                                                         now={this.state.user.life}
+                                                         label={this.state.user.life}/>
+                                        </ListGroupItem>
+                                        <ListGroupItem>
+                                            Nome: {this.state.user.name}
+                                        </ListGroupItem>
+                                        <ListGroupItem>
+                                            Ataque base: {this.state.user.ataque}
+                                        </ListGroupItem>
+                                        <ListGroupItem>
+                                            classe: {this.state.user.foto}
+                                        </ListGroupItem>
+                                        <ListGroupItem>
+                                            <Grid style={{width: '100%'}}>
+                                                <Row className="show-grid">
+                                                    {this.batalha(this.state.enemy,
+                                                        this.state.user.inventario,
+                                                        this.state.user.turn === "false")}
+                                                </Row>
+                                            </Grid>
+                                        </ListGroupItem>
+                                    </ListGroup>
+                                </td>
+                                <td style={{width: '50%', padding: '2px'}}>
+                                    <ListGroup>
+                                        <ListGroupItem>
+                                            <ProgressBar striped bsStyle="danger"
+                                                         now={this.state.enemy.life}
+                                                         label={this.state.enemy.life}/>
+                                        </ListGroupItem>
+                                        <ListGroupItem>
+                                            Nome: {this.state.enemy.name}
+                                        </ListGroupItem>
+                                        <ListGroupItem>
+                                            Ataque base: {this.state.enemy.ataque}
+                                        </ListGroupItem>
+                                        <ListGroupItem>
+                                            classe: {this.state.enemy.foto}
+                                        </ListGroupItem>
+                                        <ListGroupItem>
+                                            <Grid style={{width: '100%'}}>
+                                                <Row className="show-grid">
+                                                    {this.batalha(this.state.user,
+                                                        this.state.enemy.inventario,
+                                                        true)}
+                                                </Row>
+                                            </Grid>
+                                        </ListGroupItem>
+                                    </ListGroup>
+                                </td>
+                            </tr>
+                        </Table>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button disabled>Duelo a força não é possivel sair até terminar</Button>
+                    </Modal.Footer>
+                </Modal>
+
             </div>
         );
     }
 
     morreu = async () => {
         let self = this;
+        this.setState({user:{}});
         await confirmAlert({
             title: 'Você morreu!!',
             message: 'Deseja criar novo personagem?',
@@ -361,7 +467,7 @@ class App extends Component {
     };
 
     load_map() {
-        let obj = {name: this.state.name};
+        let obj = {name: this.state.user.name};
         let self = this;
         new Promise(async function (response, reject) {
             try {
@@ -382,10 +488,22 @@ class App extends Component {
                         if (err) throw err;
                         if (!('name' in res.User) || res.User.life <= 0) {
                             redirect = 1;
+                            delete self.state.user.duel;
+                            delete self.state.user.turn;
                             self.morreu()
                         }
-                        else{
-                            self.setState(res.User);
+                        else {
+                            if ('duel' in res.User) {
+                                let position = self.load_position(res.User.duel.x, res.User.duel.y);
+                                if (position && position.usuario) {
+                                    self.setState({enemy: position.usuario})
+                                }
+                                else {
+                                    self.setState({enemy: {}})
+
+                                }
+                            }
+                            self.setState({user: res.User});
                             response()
                         }
 
@@ -399,7 +517,7 @@ class App extends Component {
             }
 
         }).then(function () {
-            if (self.state.name) {
+            if (self.state.user.name) {
                 setTimeout(self.load_map, 300);
             }
         })

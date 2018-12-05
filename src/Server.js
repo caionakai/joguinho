@@ -76,13 +76,14 @@ let Map = {
 };
 let User = {
     userList: [],
-    create: function (name, foto) {
+    create: function (obj) {
         let position = Map.clear();
         let user = { // funcao para criar usuario
-            name: name,
+            name: obj.name,
             x: position.x,
             y: position.y,
-            foto: foto,
+            foto: obj.foto,
+            imagem: obj.imagem,
             view: 2,
             inventario: [],
             gold: 150,
@@ -114,18 +115,45 @@ let User = {
         switch (obj.type) {
             case 'usuario': {
                 let alvo = this.load_location(obj.alvo.x, obj.alvo.y);
+                let map_atacante =  Map.load_location(obj.atacante.x, obj.atacante.y);
+                let map_alvo =  Map.load_location(obj.alvo.x, obj.alvo.y);
+                alvo.duel = {x: map_atacante.x, y: map_atacante.y};
+                alvo.turn = false;
+                atacante.duel = {x: map_alvo.x, y: map_alvo.y};
+                atacante.turn = true;
+                return alvo
+            }
+            case 'duel':{
+                let alvo = this.load_location(obj.alvo.x, obj.alvo.y);
+                if (atacante.turn){
+                    let item = {ataque: 0};
+                    if (obj.item){
+                        console.log({'name':obj.atacante.name, 'item':obj.item});
+                        item = this.use_item(obj.atacante.name, obj.item);
+                        console.log(item);
+                    }
 
-                alvo.life -= atacante.ataque;
-                console.log(`Atacando usuario ${alvo.name} vida ~ ${alvo.life}`);
-                if (alvo.life <= 0) {
-                    atacante.gold += alvo.gold;
-                    atacante.inventario.concat(alvo.inventario.map((item => {
-                        return Object.assign({}, item)
-                    })));
-                    this.remove(obj.alvo.x, obj.alvo.y)
+                    alvo.life -= atacante.ataque + item.ataque;
+                    alvo.turn = true;
+                    atacante.turn = false;
+                    console.log(`Atacando usuario ${alvo.name} vida ~ ${alvo.life}`);
+                    if (alvo.life <= 0) {
+                        atacante.gold += alvo.gold;
+                        atacante.inventario.concat(alvo.inventario.map((item => {
+                            return Object.assign({}, item)
+                        })));
+                        this.remove(obj.alvo.x, obj.alvo.y)
+                    }
+                    if (alvo.life <=0 || atacante.life <= 0){delete atacante.duel;
+                        delete alvo.duel;
+                        delete atacante.duel;
+                        delete atacante.turn;
+                        delete alvo.turn;
+                    }
                 }
                 return alvo
             }
+
             case 'monster': {
                 let alvo = Map.load_location(obj.alvo.x, obj.alvo.y).monster;
                 alvo.life -= atacante.ataque;
@@ -166,8 +194,11 @@ let User = {
         this.load_name(name).inventario.push(item)
     },
     delete_item: function (name, item_usado) {
-        let i = this.load_name(name).inventario.findIndex(item => item === item_usado);
+        let i = this.load_name(name).inventario.findIndex(item => item.name == item_usado.name && item.ataque == item_usado.ataque);
         this.load_name(name).inventario.splice(i, 1)
+    },
+    find_item: function(name, item_usado){
+        return this.load_name(name).inventario.find(item => item.name == item_usado.name && item.ataque == item_usado.ataque);
     },
     use_item: function (name, item) {
         switch (item.name) {
@@ -179,7 +210,12 @@ let User = {
                 if ((x.life >= 100)) x.life = 100;
 
                 this.delete_item(name, item);
-                return x.life
+                return {ataque: 0}
+            }
+            default:{
+                let ataque = this.find_item(name,item).ataque;
+                this.delete_item(name,item);
+                return {ataque: parseInt(ataque)};
             }
         }
     }
@@ -201,7 +237,7 @@ let service = {
                 return {map: Map.load()}
             },
             CreateUser: function (obj) {
-                return {User: User.create(obj.name, obj.foto)}
+                return {user: User.create(obj)}
             },
             GetInventarioList: function (obj) {
                 return {Inventario: User.load_name(obj.name).inventario}

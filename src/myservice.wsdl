@@ -46,6 +46,15 @@
                             type='xsd:int'/>
                     <xsd:element
                             minOccurs='0'
+                            name='duel'
+                            type='typens:Position'/>
+                    <xsd:element
+                            minOccurs='0'
+                            name='turn'
+                            type='xsd:boolean'/>
+
+                    <xsd:element
+                            minOccurs='0'
                             name='view'
                             type='xsd:int'/>
                     <xsd:element
@@ -131,6 +140,7 @@
     <wsdl:message name='CreateUserRequest'>
         <wsdl:part name='name' type='xsd:string'/>
         <wsdl:part name='foto' type='xsd:string'/>
+        <wsdl:part name='imagem' type='xsd:string'/>
     </wsdl:message>
 
     <wsdl:message name='CreateUserResponse'>
@@ -145,6 +155,7 @@
         <wsdl:part name='Atacante' type='typens:User'/>
         <wsdl:part name='Alvo' type='typens:User'/>
         <wsdl:part name='type' type='xsd:string'/>
+        <wsdl:part name='item' type='typens:Item'/>
     </wsdl:message>
     <wsdl:message name='AtacarResponse'>
         <wsdl:part name='Enemy' type='typens:User'/>

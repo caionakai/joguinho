@@ -17,36 +17,43 @@ class Cadastro extends React.Component {
         this.msgServidor = this.msgServidor.bind(this);
 
         this.state = {
-            name: '',
-            imagem: ''
-        };
+            user:{
+                name: '',
+                imagem: ''
+            }
+        }
+        ;
     }
 
     componentDidMount() {
         this.setState(this.props.location.state);
     }
 
-    mudaInput(e2) {
-        this.setState({imagem: e2.target.value});
+    mudaInput(foto, imagem) {
+        let user = this.state.user;
+        user.imagem = imagem;
+        user.foto = foto;
+        this.setState({user: user});
     }
 
     handleChange(e) {
-        this.setState({name: e.target.value});
+        let user = this.state.user;
+        user.name=e.target.value;
+        this.setState({user: user});
     }
 
     msgServidor() {
 
-        let nome = this.state.name;
+        let obj = this.state.user;
         let props = this.props;
-        let foto = this.state.imagem;
         soap.createClient(url, function (err, client) {
             if (err) throw err;
             // interfaces
             console.log(client.describe().ws.funcoes);
-            client.CreateUser({name: nome, foto: foto}, function (err, res) {
+            client.CreateUser(obj, function (err, res) {
                 if (err) throw err;
-                console.log(res);
-                props.history.push({pathname: '/', state: {...res.User, foto: foto}});
+                console.log(res.user);
+                props.history.push({pathname: '/', state: res});
             });
 
         });
@@ -63,24 +70,24 @@ class Cadastro extends React.Component {
                         <ControlLabel>Nome do Usuário</ControlLabel>
                         <FormControl
                             type="text"
-                            value={this.state.name}
+                            value={this.state.user.name}
                             placeholder="Digite um nome"
                             onChange={this.handleChange}
                         />
                         <div id="inputs">
                             <label className="radio-inline">
                                 <input type="radio" name="persona" id="persona" value='saber'
-                                       onChange={this.mudaInput}/>
+                                       onChange={()=>{this.mudaInput('Saber',saber)}}/>
                                 <img src={saber} alt={'Saber'}/>
                             </label>
                             <label className="radio-inline">
                                 <input type="radio" name="persona" id="persona" value='archer'
-                                       onChange={this.mudaInput}/>
+                                       onChange={()=>{this.mudaInput('Archer',archer)}}/>
                                 <img src={archer} alt={'Archer'}/>
                             </label>
                             <label className="radio-inline">
                                 <input type="radio" name="persona" id="persona" value="corrin"
-                                       onChange={this.mudaInput}/>
+                                       onChange={()=>{this.mudaInput('Corrin',corrin)}}/>
                                 <img src={corrin} alt={'Corrin'}/>
                             </label>
                         </div>
