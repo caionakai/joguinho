@@ -1,7 +1,7 @@
 /*jslint node: true */
 "use strict";
 
-const ip =require('ip').address();
+const ip = require('ip').address();
 const soap = require('soap');
 const express = require('express');
 const cors = require('cors');
@@ -14,13 +14,13 @@ let Map = {
                 this.map.unshift({x: i, y: j})
             }
         }
-        for(let i=0;i< 10;i++)
+        for (let i = 0; i < 10; i++)
             this.add_random_monster()
     },
     add_random_monster: function () {
 
         switch (Math.floor((Math.random() * 4))) {
-            case 1:{
+            case 1: {
                 this.add_monster({
                     name: 'Wolf',
                     life: 100,
@@ -30,7 +30,7 @@ let Map = {
                 });
                 break;
             }
-            case 2:{
+            case 2: {
                 this.add_monster({
                     name: 'Bat',
                     life: 50,
@@ -40,7 +40,7 @@ let Map = {
                 });
                 break;
             }
-            case 3:{
+            case 3: {
                 this.add_monster({
                     name: 'Spider',
                     life: 200,
@@ -52,7 +52,7 @@ let Map = {
             }
         }
     }
-    ,add_monster: function (monster){
+    , add_monster: function (monster) {
         let position = Map.clear();
         this.load_location(position.x, position.y).monster = monster
     },
@@ -60,15 +60,15 @@ let Map = {
         return this.map
     },
     add_user: function (user) {
-        this.load_location(user.x,user.y).usuario = user
+        this.load_location(user.x, user.y).usuario = user
     },
-    load_location: function (x,y) { // get usuario
-        return this.map.find( obj => obj.x === parseInt(x) && obj.y === parseInt(y))
+    load_location: function (x, y) { // get usuario
+        return this.map.find(obj => obj.x === parseInt(x) && obj.y === parseInt(y))
     },
     clear: function () {
-        let len =  Math.sqrt(Map.map.length);
+        let len = Math.sqrt(Map.map.length);
         let position = Map.load_location(Math.floor((Math.random() * len)), Math.floor((Math.random() * len)));
-        while (position.usuario || position.monster){
+        while (position.usuario || position.monster) {
             position = Map.load_location(Math.floor((Math.random() * len)), Math.floor((Math.random() * len)))
         }
         return position
@@ -94,15 +94,15 @@ let User = {
         return user;
     },
     load_name: function (name) { // get usuario
-        return this.userList.find( x => x.name === name)
+        return this.userList.find(x => x.name === name)
     },
-    load_location: function (x,y) { // get usuario
-        return this.userList.find( obj => obj.x === parseInt(x) && obj.y === parseInt(y))
+    load_location: function (x, y) { // get usuario
+        return this.userList.find(obj => obj.x === parseInt(x) && obj.y === parseInt(y))
     },
-    remove: function (x,y){
+    remove: function (x, y) {
         delete Map.load_location(x, y).usuario;
         let i = this.userList.findIndex(obj => obj.x === parseInt(x) && obj.y === parseInt(y));
-        this.userList.splice(i,1);
+        this.userList.splice(i, 1);
     },
     remove_gold: function (name, valor) {// tira dinheiro do usuario
         let user = this.load_name(name);
@@ -112,34 +112,39 @@ let User = {
     atacar: function (obj) {
         let atacante = this.load_location(obj.atacante.x, obj.atacante.y);
         switch (obj.type) {
-            case 'usuario':{
+            case 'usuario': {
                 let alvo = this.load_location(obj.alvo.x, obj.alvo.y);
 
                 alvo.life -= atacante.ataque;
                 console.log(`Atacando usuario ${alvo.name} vida ~ ${alvo.life}`);
-                if(alvo.life <= 0){
+                if (alvo.life <= 0) {
                     atacante.gold += alvo.gold;
-                    atacante.inventario.concat(alvo.inventario);
-                    this.remove(obj.alvo.x,obj.alvo.y)
+                    atacante.inventario.concat(alvo.inventario.map((item => {
+                        return Object.assign({}, item)
+                    })));
+                    this.remove(obj.alvo.x, obj.alvo.y)
                 }
                 return alvo
             }
-            case 'monster':{
-
+            case 'monster': {
                 let alvo = Map.load_location(obj.alvo.x, obj.alvo.y).monster;
                 alvo.life -= atacante.ataque;
                 atacante.life -= alvo.ataque;
-                console.log(`Atacando monstro vida ~ ${alvo.life}`);
-                if(alvo.life <= 0){
+                console.log(`Atacando ${alvo.name} vida ~ ${alvo.life}`);
+                if (alvo.life <= 0) {
                     atacante.gold += alvo.gold;
-                    atacante.inventario.concat(alvo.inventario);
+                    atacante.inventario.concat(alvo.inventario.map((item => {
+                        return Object.assign({}, item)
+                    })));
                     delete Map.load_location(obj.alvo.x, obj.alvo.y).monster;
                     Map.add_random_monster();
                 }
-                else if(atacante.life <=0){
-                    alvo.inventario.concat(atacante.inventario);
+                else if (atacante.life <= 0) {
+                    alvo.inventario.concat(atacante.inventario.map((item => {
+                        return Object.assign({}, item)
+                    })));
                     alvo.gold = atacante.gold;
-                    this.remove(obj.atacante.x,obj.atacante.y);
+                    this.remove(obj.atacante.x, obj.atacante.y);
                 }
                 return alvo
             }
@@ -162,14 +167,18 @@ let User = {
     },
     delete_item: function (name, item_usado) {
         let i = this.load_name(name).inventario.findIndex(item => item === item_usado);
-        this.load_name(name).inventario.splice(i,1)
+        this.load_name(name).inventario.splice(i, 1)
     },
     use_item: function (name, item) {
         switch (item.name) {
-            case 'potion':{// cura vida passando name do usuario e qnt de vida a ser curada
-                let x =this.load_name(name);
+            case 'potion': {// cura vida passando name do usuario e qnt de vida a ser curada
+                let x = this.load_name(name);
+                if (x.life >= 100) return x.life;
+
                 x.life += parseInt(item.cura);
-                this.delete_item(name,item);
+                if ((x.life >= 100)) x.life = 100;
+
+                this.delete_item(name, item);
                 return x.life
             }
         }
@@ -182,11 +191,11 @@ let service = {
             GetUser: function (obj) {
                 return {User: User.load_name(obj.name)}
             },
-            Atacar: function(obj){
-              return User.atacar(obj)
+            Atacar: function (obj) {
+                return User.atacar(obj)
             },
-            Move: function(obj){
-              return User.move(obj)
+            Move: function (obj) {
+                return User.move(obj)
             },
             GetMap: function () {
                 return {map: Map.load()}
@@ -195,16 +204,16 @@ let service = {
                 return {User: User.create(obj.name, obj.foto)}
             },
             GetInventarioList: function (obj) {
-                return {Inventario:User.load_name(obj.name).inventario}
+                return {Inventario: User.load_name(obj.name).inventario}
             },
             AddInventario: function (obj) {
                 User.add_item(obj.name, obj.item);
                 return {Inventario: User.load_name(obj.name).inventario}
             },
-            RemoveGold: function (obj){
-                return {Gold: User.remove_gold(obj.name, obj.valor) }
+            RemoveGold: function (obj) {
+                return {Gold: User.remove_gold(obj.name, obj.valor)}
             },
-            Use_Item: function (obj){
+            Use_Item: function (obj) {
                 User.use_item(obj.name, obj.item);
                 return {Inventario: User.load_name(obj.name).inventario}
             }

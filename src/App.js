@@ -8,7 +8,8 @@ import sword from './sword.png';
 import pistol from './pistol.png';
 import bow from './bow.png';
 import potion from './potion.png';
-
+import {confirmAlert} from "react-confirm-alert";
+import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
 const ip = require('ip').address();
 const url = 'http://' + ip + ':8001/wscalc1?wsdl';
 const soap = require('soap-everywhere');
@@ -221,8 +222,8 @@ class App extends Component {
     }
 
     inventario_item(item) {
-        let attr = <ListGroup header={item.name} href="#" onClick={()=>this.use_item(item)}>
-            {item.ataque? `Dano ${item.ataque}`: `Cura ${item.cura}`}
+        let attr = <ListGroup header={item.name} href="#" onClick={() => this.use_item(item)}>
+            {item.ataque ? `Dano ${item.ataque}` : `Cura ${item.cura}`}
         </ListGroup>;
         return (
             <ListGroupItem>
@@ -337,6 +338,28 @@ class App extends Component {
         );
     }
 
+    morreu = async () => {
+        let self = this;
+        await confirmAlert({
+            title: 'Você morreu!!',
+            message: 'Deseja criar novo personagem?',
+            buttons: [
+                {
+                    label: 'Sim',
+                    onClick: () => {
+                        self.props.history.push({pathname: '/cadastro'})
+                    }
+                },
+                {
+                    label: 'Não',
+                    onClick: () => {
+                        self.props.history.push({pathname: '/home'})
+                    }
+                }
+            ]
+        })
+    };
+
     load_map() {
         let obj = {name: this.state.name};
         let self = this;
@@ -350,27 +373,26 @@ class App extends Component {
                         if (err) throw err;
                         self.setState(res.map)
                     });
-                    client.GetUser(obj, function (err, res) {
-                        if (err) throw err;
-                        if (!('name' in res.User) || self.state.life <= 0) {
-                            if (self.state.life <= 0 && redirect === 0) {
-                                alert("Você morreu")
-                            }
-                            redirect = 1;
-                            delete self.props.location.state;
-                            delete self.state.name;
-
-                            self.props.history.push({pathname: '/cadastro'})
-                        }
-                        self.setState(res.User)
-                    });
                     client.GetInventarioList(obj, function (err, res) {
                         if (err) throw err;
                         self.setState({inventario: res.Inventario.Inventario})
-                    })
+                    });
+
+                    client.GetUser(obj, function (err, res) {
+                        if (err) throw err;
+                        if (!('name' in res.User) || res.User.life <= 0) {
+                            redirect = 1;
+                            self.morreu()
+                        }
+                        else{
+                            self.setState(res.User);
+                            response()
+                        }
+
+                    });
 
                 });
-                setTimeout(response, 300);
+
             }
             catch (e) {
                 reject(e)
@@ -378,7 +400,7 @@ class App extends Component {
 
         }).then(function () {
             if (self.state.name) {
-                self.load_map();
+                setTimeout(self.load_map, 300);
             }
         })
     }
