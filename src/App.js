@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import './App.css';
-import {Button, Modal, ProgressBar} from 'react-bootstrap';
+import {Button, Modal, ProgressBar, ListGroupItem, ListGroup} from 'react-bootstrap';
 import saber from './saber.png';
 import archer from './archer.png';
 import corrin from './corrin.png';
@@ -16,12 +16,11 @@ const soap = require('soap-everywhere');
 class App extends Component {
     constructor(props, context) {
         super(props, context);
-        this.handleChange = this.handleChange.bind(this);
         this.handleItem = this.handleItem.bind(this);
         this.comprar = this.comprar.bind(this);
         this.load_map = this.load_map.bind(this);
         this.render_map = this.render_map.bind(this);
-        this.curaVida = this.curaVida.bind(this);
+        this.use_item = this.use_item.bind(this);
         this.state = {
             name: '',
             x: '--',
@@ -37,12 +36,8 @@ class App extends Component {
         }
     }
 
-    handleItem(item_name, item_image, preco) {
-        this.setState({item: {name: item_name, imagem: item_image, valor: preco}});
-    }
-
-    handleChange(e) {
-        this.setState({item: e.target.value});
+    handleItem(obj) {
+        this.setState({item: obj});
     }
 
     componentDidUpdate() {
@@ -104,9 +99,10 @@ class App extends Component {
                 }
                 else {
                     if (position.monster && position.monster.hasOwnProperty('name')) {
+
+                        // eslint-disable-next-line
                         children.push(
                             <td style={{fontSize: '.8em'}}>
-                                // eslint-disable-next-line
                                 <a className={'hand'}
                                    onClick={() => this.atacar(position, 'monster')}>{position.monster.name.toUpperCase()}</a>
 
@@ -118,17 +114,18 @@ class App extends Component {
                                 <td style={{fontSize: '.8em'}}>
                                     {this.state.foto.toUpperCase()}
                                 </td>);
-                        else
+                        else {
+                            // eslint-disable-next-line
                             children.push(
                                 <td style={{fontSize: '.8em'}}>
-                                    // eslint-disable-next-line
                                     <a className={'hand'}
                                        onClick={() => this.atacar(position, 'usuario')}>{position.usuario.foto.toUpperCase()}</a>
                                 </td>)
+                        }
                     }
                     else {
+                        // eslint-disable-next-line
                         children.push(<td>
-                            // eslint-disable-next-line
                             <a className={'hand'}
                                onClick={() => this.move(position)}>{`_.._`}</a>
                         </td>)
@@ -207,20 +204,34 @@ class App extends Component {
         }
     }
 
-    curaVida() {
+    use_item(item) {
         var nome = this.state.name;
         let self = this;
         soap.createClient(url, function (err, client) {
             if (err) throw err;
 
 
-            client.CuraVida({name: nome, valor: 10}, function (err, res) {
+            client.Use_Item({name: nome, item: item}, function (err, res) {
                 if (err) throw err;
                 self.setState({
                     inventario: res.Inventario
                 });
             });
         });
+    }
+
+    inventario_item(item) {
+        let attr = <ListGroup header={item.name} onClick={()=>this.use_item(item)}>
+            {item.ataque? `Dano ${item.ataque}`: `Cura ${item.cura}`}
+        </ListGroup>;
+        return (
+            <ListGroupItem>
+                <td><img src={item.imagem} style={{maxWidth: '40px', maxHeight: '40px'}} alt={item.name}/></td>
+                <td>
+                    {attr}
+                </td>
+            </ListGroupItem>
+        )
     }
 
     imprimeInventario() {
@@ -230,38 +241,11 @@ class App extends Component {
         // console.log(item)
         if (!item) return;
         if (!(item instanceof Array)) {
-            if (item.name === 'potion') {
-                array.push(<li style={{paddingLeft: '3%'}}>
-                    <img src={item.imagem} style={{maxWidth: '40px', maxHeight: '40px'}} alt={item.name}/>
-                    {item.name}
-                    <Button bsSize="xsmall" id="btnUse" bsStyle="success" onClick={this.curaVida}> Usar </Button>
-                </li>);
-                return array;
-            }
-            else {
-                array.push(<li style={{paddingLeft: '3%'}}>
-                    <img src={item.imagem} alt={item.name} style={{maxWidth: '40px', maxHeight: '40px'}}/>
-                    {item.name}
-                </li>);
-                return array;
-            }
+            array.push(this.inventario_item(item));
+            return array
         }
-
-
         for (let i = 0; i < item.length; i++) {
-            // console.log(item[i])
-            // console.log(i)
-            if (item[i].name === 'potion') {
-                array.push(<li style={{paddingLeft: '3%'}}>
-                    <img src={item[i].imagem} alt={item[i].name} style={{maxWidth: '40px', maxHeight: '40px'}}/>{item[i].name}
-                    <Button bsSize="xsmall" id="btnUse" bsStyle="success" onClick={this.curaVida}> Usar </Button>
-                </li>)
-            } else {
-                array.push(<li style={{paddingLeft: '3%'}}>
-                    <img src={item[i].imagem} alt={item[i].name} style={{maxWidth: '40px', maxHeight: '40px'}}/>{item[i].name}
-                </li>)
-            }
-
+            array.push(this.inventario_item(item[i]))
         }
         return array
     }
@@ -270,22 +254,26 @@ class App extends Component {
         let array = [];
         array.push(
             <label style={{width: '50%', padding: '2%'}}><p>Preço $50</p>
-                <input type="radio" name="a" value="sword" onChange={() => this.handleItem('sword', sword, 50)}/>
+                <input type="radio" name="a" value="sword"
+                       onChange={() => this.handleItem({name: 'sword', imagem: sword, valor: 50, ataque: 10})}/>
                 <img src={sword} alt={"Espada"}/></label>
         );
         array.push(
             <label style={{width: '50%', padding: '2%'}}><p>Preço $50</p>
-                <input type="radio" name="a" value="pistol" onChange={() => this.handleItem('pistol', pistol, 50)}/>
+                <input type="radio" name="a" value="pistol"
+                       onChange={() => this.handleItem({name: 'pistol', imagem: pistol, valor: 50, ataque: 10})}/>
                 <img src={pistol} alt={'Pistola'}/></label>
         );
         array.push(
             <label style={{width: '50%', padding: '2%'}}><p>Preço $50</p>
-                <input type="radio" name="a" value="bow" onChange={() => this.handleItem('bow', bow, 50)}/>
+                <input type="radio" name="a" value="bow"
+                       onChange={() => this.handleItem({name: 'bow', imagem: bow, valor: 50, ataque: 10})}/>
                 <img src={bow} alt={'Arco'}/></label>
         );
         array.push(
             <label style={{width: '50%', padding: '2%'}}><p>Preço $10</p>
-                <input type="radio" name="a" value="potion" onChange={() => this.handleItem('potion', potion, 10)}/>
+                <input type="radio" name="a" value="potion"
+                       onChange={() => this.handleItem({name: 'potion', imagem: potion, valor: 10, cura: 30})}/>
                 <img src={potion} alt={'Poção de cura'}/></label>
         );
         return array
@@ -322,10 +310,9 @@ class App extends Component {
                         </th>
 
                         <th style={{border: '1px solid black', width: '35%'}}>
-                            <div id="caio">
+                            <ListGroup>
                                 {this.imprimeInventario()}
-
-                            </div>
+                            </ListGroup>
                         </th>
                     </tr>
                 </table>
@@ -354,7 +341,7 @@ class App extends Component {
         let obj = {name: this.state.name};
         let self = this;
         new Promise(async function (response, reject) {
-            try{
+            try {
                 let redirect = 0;
                 await soap.createClient(url, function (err, client) {
                     if (err) throw err;
@@ -379,8 +366,7 @@ class App extends Component {
                     });
                     client.GetInventarioList(obj, function (err, res) {
                         if (err) throw err;
-
-                        self.setState({inventario: res.Inventario})
+                        self.setState({inventario: res.Inventario.Inventario})
                     })
 
                 });

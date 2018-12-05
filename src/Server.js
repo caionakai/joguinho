@@ -160,16 +160,16 @@ let User = {
     add_item: function (name, item) { // adiciona item no inventario passando name do usuario e o item
         this.load_name(name).inventario.push(item)
     },
-    delete_item: function (name, item_name) {
-        let i = this.load_name(name).inventario.findIndex(item => item.name === item_name);
+    delete_item: function (name, item_usado) {
+        let i = this.load_name(name).inventario.findIndex(item => item === item_usado);
         this.load_name(name).inventario.splice(i,1)
     },
-    use_item: function (name, item_name, valor) {
-        switch (item_name) {
+    use_item: function (name, item) {
+        switch (item.name) {
             case 'potion':{// cura vida passando name do usuario e qnt de vida a ser curada
                 let x =this.load_name(name);
-                x.life += parseInt(valor);
-                this.delete_item(name,item_name);
+                x.life += parseInt(item.cura);
+                this.delete_item(name,item);
                 return x.life
             }
         }
@@ -204,8 +204,8 @@ let service = {
             RemoveGold: function (obj){
                 return {Gold: User.remove_gold(obj.name, obj.valor) }
             },
-            CuraVida: function (obj){
-                User.use_item(obj.name,'potion', obj.valor);
+            Use_Item: function (obj){
+                User.use_item(obj.name, obj.item);
                 return {Inventario: User.load_name(obj.name).inventario}
             }
         }

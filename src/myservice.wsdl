@@ -21,7 +21,7 @@
             <xsd:complexType name='InventarioList'>
                 <xsd:complexContent mixed='false'>
                     <xsd:restriction base='soapenc:Array'>
-                        <xsd:attribute wsdl:arrayType='Inventario[]' ref='soapenc:arrayType'/>
+                        <xsd:attribute wsdl:arrayType='Item[]' ref='soapenc:arrayType'/>
                     </xsd:restriction>
                 </xsd:complexContent>
             </xsd:complexType>
@@ -51,7 +51,7 @@
                     <xsd:element
                             minOccurs='0'
                             name='inventario'
-                            type='typens:InventarioList'/>
+                            wsdl:arrayType='Item[]'/>
                     <xsd:element
                             minOccurs='0'
                             name='gold'
@@ -63,6 +63,30 @@
                     <xsd:element
                             minOccurs='0'
                             name='ataque'
+                            type='xsd:int'/>
+                </xsd:all>
+            </xsd:complexType>
+            <xsd:complexType name='Item'>
+                <xsd:all>
+                    <xsd:element
+                            minOccurs='0'
+                            name='name'
+                            type='xsd:string'/>
+                    <xsd:element
+                            minOccurs='0'
+                            name='imagem'
+                            type='xsd:string'/>
+                    <xsd:element
+                            minOccurs='0'
+                            name='ataque'
+                            type='xsd:int'/>
+                    <xsd:element
+                            minOccurs='0'
+                            name='cura'
+                            type='xsd:int'/>
+                    <xsd:element
+                            minOccurs='0'
+                            name='valor'
                             type='xsd:int'/>
                 </xsd:all>
             </xsd:complexType>
@@ -172,12 +196,12 @@
         <wsdl:part name='Gold' type='xsd:int'/>
     </wsdl:message>
 
-    <wsdl:message name='CuraVidaRequest'>
+    <wsdl:message name='Use_ItemRequest'>
         <wsdl:part name="name" type='xsd:string'/>
-        <wsdl:part name="valor" type='xsd:int'/>
+        <wsdl:part name="item" type='typens:Item'/>
     </wsdl:message>
 
-    <wsdl:message name='CuraVidaResponse'>
+    <wsdl:message name='Use_ItemResponse'>
         <wsdl:part name='Life' type='xsd:int'/>
     </wsdl:message>
 
@@ -226,9 +250,9 @@
             <wsdl:output message="RemoveGoldResponse"/>
         </wsdl:operation>    
 
-        <wsdl:operation name="CuraVida">
-            <wsdl:input message="CuraVidaRequest"/>
-            <wsdl:output message="CuraVidaResponse"/>
+        <wsdl:operation name="Use_Item">
+            <wsdl:input message="Use_ItemRequest"/>
+            <wsdl:output message="Use_ItemResponse"/>
         </wsdl:operation>        
     </wsdl:portType>
 
@@ -342,8 +366,8 @@
             </wsdl:output>
         </wsdl:operation>
 
-        <wsdl:operation name="CuraVida">
-            <soap:operation soapAction="CuraVida"/>
+        <wsdl:operation name="Use_Item">
+            <soap:operation soapAction="Use_Item"/>
             <wsdl:input>
                 <soap:body use="encoded"
                            encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
