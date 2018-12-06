@@ -23,18 +23,20 @@ let Map = {
             case 1: {
                 this.add_monster({
                     name: 'Wolf',
-                    life: 100,
-                    gold: 10,
+                    life: 200,
+                    maximo_life: 200,
+                    gold: 350,
                     inventario: [],
-                    ataque: 10
+                    ataque: 25
                 });
                 break;
             }
             case 2: {
                 this.add_monster({
                     name: 'Bat',
-                    life: 50,
-                    gold: 5,
+                    life: 70,
+                    maximo_life: 70,
+                    gold: 120,
                     inventario: [],
                     ataque: 10
                 });
@@ -43,10 +45,11 @@ let Map = {
             case 3: {
                 this.add_monster({
                     name: 'Spider',
-                    life: 200,
-                    gold: 30,
+                    life: 100,
+                    maximo_life: 100,
+                    gold: 200,
                     inventario: [],
-                    ataque: 25
+                    ataque: 20
                 });
                 break;
             }
@@ -54,6 +57,8 @@ let Map = {
     }
     , add_monster: function (monster) {
         let position = Map.clear();
+        monster.x = position.x;
+        monster.y = position.y;
         this.load_location(position.x, position.y).monster = monster
     },
     load: function () {
@@ -85,6 +90,7 @@ let User = {
             inventario: [],
             gold: 150,
             life: 100,
+            maximo_life: 100,
             ataque: 20,
             ...obj
         };
@@ -131,6 +137,7 @@ let User = {
                     if(!(obj.item && obj.item.cura >0)){
                         alvo.life -= atacante.ataque + item.ataque;
                     }
+                    if (obj.type)
                     alvo.turn = true;
                     atacante.turn = false;
                     console.log(`Atacando usuario ${alvo.name} vida ~ ${alvo.life}`);
@@ -150,10 +157,15 @@ let User = {
                 }
                 return alvo
             }
-
-            case 'monster': {
+            case 'duel_monster':{
                 let alvo = Map.load_location(obj.alvo.x, obj.alvo.y).monster;
-                alvo.life -= atacante.ataque;
+                let item = {ataque: 0};
+                if (obj.item){
+                    item = this.use_item(obj.atacante.name, obj.item);
+                }
+                if(!(obj.item && obj.item.cura >0)){
+                    alvo.life -= atacante.ataque + item.ataque;
+                }
                 atacante.life -= alvo.ataque;
                 console.log(`Atacando ${alvo.name} vida ~ ${alvo.life}`);
                 if (alvo.life <= 0) {
@@ -171,6 +183,34 @@ let User = {
                     alvo.gold = atacante.gold;
                     this.remove(obj.atacante.x, obj.atacante.y);
                 }
+                if (alvo.life <=0 || atacante.life <= 0){delete atacante.duel;
+                    delete alvo.duel;
+                    delete atacante.duel;
+                    delete atacante.turn;
+                    delete alvo.turn;
+                }
+                return alvo
+            }
+            case 'quit':{
+                let alvo = Map.load_location(obj.alvo.x, obj.alvo.y).monster;
+                if(!alvo){
+                    alvo = this.load_location(obj.alvo.x, obj.alvo.y)
+                }
+                delete alvo.duel;
+                delete atacante.duel;
+                delete atacante.turn;
+                delete alvo.turn;
+                return alvo;
+            }
+
+            case 'monster': {
+                let alvo = Map.load_location(obj.alvo.x, obj.alvo.y).monster;
+                let map_atacante =  Map.load_location(obj.atacante.x, obj.atacante.y);
+                let map_alvo =  Map.load_location(obj.alvo.x, obj.alvo.y);
+                alvo.duel = {x: map_atacante.x, y: map_atacante.y};
+                alvo.turn = true;
+                atacante.duel = {x: map_alvo.x, y: map_alvo.y};
+                atacante.turn = true;
                 return alvo
             }
         }

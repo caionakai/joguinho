@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<wsdl:definitions name="wscalc1" targetNamespace="http://192.168.1.2:8000/wscalc1" xmlns="http://192.168.1.2:3000"
+<wsdl:definitions name="wscalc1" targetNamespace="http://20.0.189.232:8000/wscalc1" xmlns="http://20.0.189.232:3000"
                   xmlns:typens="http://oes.oracle.com/OracleSearch"
                   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
                   xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
@@ -71,6 +71,10 @@
                             type='xsd:int'/>
                     <xsd:element
                             minOccurs='0'
+                            name='maximo_life'
+                            type='xsd:int'/>
+                    <xsd:element
+                            minOccurs='0'
                             name='ataque'
                             type='xsd:int'/>
                 </xsd:all>
@@ -113,6 +117,10 @@
                     <xsd:element
                             minOccurs='0'
                             name='usuario'
+                            type='typens:User'/>
+                    <xsd:element
+                            minOccurs='0'
+                            name='monster'
                             type='typens:User'/>
                 </xsd:all>
             </xsd:complexType>
@@ -392,7 +400,7 @@
 
     <wsdl:service name="ws">
         <wsdl:port binding="Game" name="funcoes">
-            <soap:address location="http://192.168.1.2:8001/wscalc1"/>
+            <soap:address location="http://20.0.189.232:8001/wscalc1"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>

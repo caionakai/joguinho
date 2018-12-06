@@ -9,7 +9,7 @@ import potion from './potion.png';
 import {confirmAlert} from "react-confirm-alert";
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
 const ip = require('ip').address();
-const url = 'http://192.168.1.2:8001/wscalc1?wsdl';
+const url = 'http://20.0.189.232:8001/wscalc1?wsdl';
 const soap = require('soap-everywhere');
 
 class App extends Component {
@@ -295,7 +295,7 @@ class App extends Component {
                     <center>
                         <Button className="btn btn-xs btn-block"
                                 disabled={disabled}
-                                onClick={() => this.atacar(position, 'duel', count[key])}> {key} [{count2[key] || '∞'}]</Button>
+                                onClick={() => this.atacar(position, (enemy.turn == 'true') ? 'duel_monster' : 'duel', count[key])}> {key} [{count2[key] || '∞'}]</Button>
                     </center>
                 </Col>
             )
@@ -324,7 +324,7 @@ class App extends Component {
                     </tr>
                     <tr style={{border: '1px solid black'}}>
                         <th style={{width: '25%', border: '1px solid black', textAlign: 'center'}}>
-                            <ProgressBar striped bsStyle="danger" now={this.state.user.life} label="Life"/>
+                            <ProgressBar striped bsStyle="danger" now={this.state.user.life} max={this.state.user.maximo_life} label="Life"/>
                             <var style={{color: 'yellow', fontSize: '20px'}}>Gold: ${this.state.user.gold}</var>
                             <img src={this.state.user.imagem} alt={this.state.user.name} style={{width: '100%'}}/>
                         </th>
@@ -367,7 +367,8 @@ class App extends Component {
                                 {' '}
                                 <var style={{color: 'red'}}>{this.state.user.name}[{this.state.user.foto}]</var>
                                 {' contra '}
-                                <var style={{color: 'red'}}>{this.state.enemy.name}[{this.state.enemy.foto}]</var>
+                                <var
+                                    style={{color: 'red'}}> {this.state.enemy.name} {(this.state.enemy.foto) ? `[${this.state.enemy.foto}]` : '[Monstro]'}</var>
                                 {' '}
                             </center>
                         </Modal.Title>
@@ -380,7 +381,11 @@ class App extends Component {
                                         <ListGroupItem>
                                             <ProgressBar striped bsStyle="danger"
                                                          now={this.state.user.life}
+                                                         max={this.state.user.maximo_life}
                                                          label={this.state.user.life}/>
+                                        </ListGroupItem>
+                                        <ListGroupItem>
+                                            Vida: {this.state.user.life} / {this.state.user.maximo_life}
                                         </ListGroupItem>
                                         <ListGroupItem>
                                             Nome: {this.state.user.name}
@@ -407,7 +412,11 @@ class App extends Component {
                                         <ListGroupItem>
                                             <ProgressBar striped bsStyle="danger"
                                                          now={this.state.enemy.life}
+                                                         max={this.state.enemy.maximo_life}
                                                          label={this.state.enemy.life}/>
+                                        </ListGroupItem>
+                                        <ListGroupItem>
+                                            Vida: {this.state.enemy.life} / {this.state.enemy.maximo_life}
                                         </ListGroupItem>
                                         <ListGroupItem>
                                             Nome: {this.state.enemy.name}
@@ -416,7 +425,7 @@ class App extends Component {
                                             Ataque base: {this.state.enemy.ataque}
                                         </ListGroupItem>
                                         <ListGroupItem>
-                                            Classe: {this.state.enemy.foto}
+                                            Classe: {(this.state.enemy.foto) ? `[${this.state.enemy.foto}]` : '[Monstro]'}
                                         </ListGroupItem>
                                         <ListGroupItem>
                                             <Grid style={{width: '100%'}}>
@@ -433,7 +442,9 @@ class App extends Component {
                         </Table>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button disabled>Duelo a força não é possivel sair até terminar</Button>
+                        <Button
+                            disabled={this.state.enemy.foto} onClick={()=> this.atacar(this.state.enemy, 'quit')}>{this.state.enemy.foto ?
+                            'Duelo a força não é possivel sair até terminar' :'Sair'}</Button>
                     </Modal.Footer>
                 </Modal>
 
@@ -443,7 +454,7 @@ class App extends Component {
 
     morreu = async () => {
         let self = this;
-        this.setState({user:{}});
+        this.setState({user: {}});
         await confirmAlert({
             title: <center>Você morreu!!</center>,
             message: <center>Deseja criar outro personagem? <img src={skull}/></center>,
@@ -493,6 +504,9 @@ class App extends Component {
                                 let position = self.load_position(res.User.duel.x, res.User.duel.y);
                                 if (position && position.usuario) {
                                     self.setState({enemy: position.usuario})
+                                }
+                                else if (position && position.monster) {
+                                    self.setState({enemy: position.monster})
                                 }
                                 else {
                                     self.setState({enemy: {}})
