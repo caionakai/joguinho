@@ -208,13 +208,13 @@ class App extends Component {
         });
     }
 
-    inventario_item(item, size=1) {
-        let attr = <ListGroup header={item.name} >
+    inventario_item(item, size = 1) {
+        let attr = <ListGroup header={item.name}>
             {(item.ataque && item.ataque > 0) ? `Dano ${item.ataque}` : `Cura ${item.cura}`}
         </ListGroup>;
         return (
             <ListGroupItem onClick={() => {
-                if((parseInt(item.cura) > 0))
+                if ((parseInt(item.cura) > 0))
                     return this.use_item(item)
             }} className={'hand'}>
                 <td><img src={item.imagem} style={{maxWidth: '40px', maxHeight: '40px'}} alt={item.name}/></td>
@@ -249,22 +249,22 @@ class App extends Component {
     lista() {
         let array = [];
         array.push(
-            <label style={{width: '25%', padding: '2%'}}><p>Preço $50</p>
+            <label style={{width: '25%', padding: '2%'}}><p>Preço $100</p>
                 <input type="radio" name="a" value="sword"
-                       onChange={() => this.handleItem({name: 'sword', imagem: sword, valor: 50, ataque: 10})}/>
-                <img src={sword} alt={"Espada"} style={{width:'100%'}}/></label>
+                       onChange={() => this.handleItem({name: 'sword', imagem: sword, valor: 100, ataque: 50})}/>
+                <img src={sword} alt={"Espada"} style={{width: '100%'}}/></label>
         );
         array.push(
-            <label style={{width: '25%', padding: '2%'}}><p>Preço $50</p>
+            <label style={{width: '25%', padding: '2%'}}><p>Preço $70</p>
                 <input type="radio" name="a" value="pistol"
-                       onChange={() => this.handleItem({name: 'pistol', imagem: pistol, valor: 50, ataque: 10})}/>
-                <img src={pistol} alt={'Pistola'} style={{width:'100%'}}/></label>
+                       onChange={() => this.handleItem({name: 'pistol', imagem: pistol, valor: 70, ataque: 35})}/>
+                <img src={pistol} alt={'Pistola'} style={{width: '100%'}}/></label>
         );
         array.push(
-            <label style={{width: '25%', padding: '2%'}}><p>Preço $50</p>
+            <label style={{width: '25%', padding: '2%'}}><p>Preço $20</p>
                 <input type="radio" name="a" value="bow"
-                       onChange={() => this.handleItem({name: 'bow', imagem: bow, valor: 50, ataque: 10})}/>
-                <img src={bow} alt={'Arco'} style={{width:'100%'}}/></label>
+                       onChange={() => this.handleItem({name: 'bow', imagem: bow, valor: 20, ataque: 10})}/>
+                <img src={bow} alt={'Arco'} style={{width: '100%'}}/></label>
         );
         array.push(
             <label style={{width: '25%', padding: '2%'}}><p>Preço $10</p>
@@ -276,7 +276,19 @@ class App extends Component {
                            ataque: 0,
                            cura: 30
                        })}/>
-                <img src={potion} style={{width:'100%'}} alt={'Poção de cura'}/></label>
+                <img src={potion} style={{width: '100%'}} alt={'Poção de cura'}/></label>
+        );
+        array.push(
+            <label style={{width: '25%', padding: '2%'}}><p>Preço $30</p>
+                <input type="radio" name="a" value="potion2"
+                       onChange={() => this.handleItem({
+                           name: 'potion2',
+                           imagem: potion,
+                           valor: 30,
+                           ataque: 0,
+                           cura: 100
+                       })}/>
+                <img src={potion} style={{width: '100%'}} alt={'Poção de cura'}/></label>
         );
         return array
     }
@@ -334,7 +346,7 @@ class App extends Component {
                         <th style={{width: '25%', border: '1px solid black', textAlign: 'center'}}>
                             <ProgressBar striped bsStyle="danger" now={this.state.user.life}
                                          max={this.state.user.maximo_life} label="Life"/>
-                            <var style={{color: 'yellow', fontSize: '20px'}}>Gold: ${this.state.user.gold}</var>
+                            <var style={{color: 'red', fontSize: '20px'}}>Gold: ${this.state.user.gold}</var>
                             <img src={this.state.user.imagem} alt={this.state.user.name} style={{width: '100%'}}/>
                         </th>
 

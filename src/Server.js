@@ -241,9 +241,21 @@ let User = {
         switch (item.name) {
             case 'potion': {// cura vida passando name do usuario e qnt de vida a ser curada
                 let x = this.load_name(name);
-                if (x.life >= 100) return x.life;
+                if (x.life >= 100) return {ataque: 0};
 
                 x.life += parseInt(item.cura);
+                if ((x.life >= 100)) x.life = 100;
+
+                this.delete_item(name, item);
+                return {ataque: 0}
+            }
+            case 'potion2': {
+
+                let x = this.load_name(name);
+                if (x.life >= 100) return {ataque: 0};
+
+                x.life += parseInt(item.cura);
+                console.log(item);
                 if ((x.life >= 100)) x.life = 100;
 
                 this.delete_item(name, item);
