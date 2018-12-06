@@ -208,14 +208,18 @@ class App extends Component {
         });
     }
 
-    inventario_item(item) {
-        let attr = <ListGroup header={item.name} href="#" onClick={() => this.use_item(item)}>
+    inventario_item(item, size=1) {
+        let attr = <ListGroup header={item.name} >
             {(item.ataque && item.ataque > 0) ? `Dano ${item.ataque}` : `Cura ${item.cura}`}
         </ListGroup>;
         return (
-            <ListGroupItem>
+            <ListGroupItem onClick={() => {
+                if((parseInt(item.cura) > 0))
+                    return this.use_item(item)
+            }} className={'hand'}>
                 <td><img src={item.imagem} style={{maxWidth: '40px', maxHeight: '40px'}} alt={item.name}/></td>
                 <td>
+                    Quantidade: [{size}]
                     {attr}
                 </td>
             </ListGroupItem>
@@ -223,43 +227,47 @@ class App extends Component {
     }
 
     imprimeInventario() {
-        let array = [];
-        let item = this.state.user.inventario;
-
-        // console.log(item)
-        if (!item) return;
-        if (!(item instanceof Array)) {
-            array.push(this.inventario_item(item));
-            return array
+        let count = {};
+        let count2 = {};
+        let inventario = this.state.user.inventario;
+        if (inventario) {
+            if (!(inventario instanceof Array)) {
+                inventario = [inventario]
+            }
+            inventario.forEach(function (i) {
+                count[i.name] = i;
+                count2[i.name] = (count2[i.name] || 0) + 1;
+            });
         }
-        for (let i = 0; i < item.length; i++) {
-            array.push(this.inventario_item(item[i]))
-        }
-        return array
+        let keys = Object.keys(count);
+        let self = this;
+        return keys.map(key => {
+            return self.inventario_item(count[key], count2[key])
+        });
     }
 
     lista() {
         let array = [];
         array.push(
-            <label style={{width: '50%', padding: '2%'}}><p>Preço $50</p>
+            <label style={{width: '25%', padding: '2%'}}><p>Preço $50</p>
                 <input type="radio" name="a" value="sword"
                        onChange={() => this.handleItem({name: 'sword', imagem: sword, valor: 50, ataque: 10})}/>
-                <img src={sword} alt={"Espada"}/></label>
+                <img src={sword} alt={"Espada"} style={{width:'100%'}}/></label>
         );
         array.push(
-            <label style={{width: '50%', padding: '2%'}}><p>Preço $50</p>
+            <label style={{width: '25%', padding: '2%'}}><p>Preço $50</p>
                 <input type="radio" name="a" value="pistol"
                        onChange={() => this.handleItem({name: 'pistol', imagem: pistol, valor: 50, ataque: 10})}/>
-                <img src={pistol} alt={'Pistola'}/></label>
+                <img src={pistol} alt={'Pistola'} style={{width:'100%'}}/></label>
         );
         array.push(
-            <label style={{width: '50%', padding: '2%'}}><p>Preço $50</p>
+            <label style={{width: '25%', padding: '2%'}}><p>Preço $50</p>
                 <input type="radio" name="a" value="bow"
                        onChange={() => this.handleItem({name: 'bow', imagem: bow, valor: 50, ataque: 10})}/>
-                <img src={bow} alt={'Arco'}/></label>
+                <img src={bow} alt={'Arco'} style={{width:'100%'}}/></label>
         );
         array.push(
-            <label style={{width: '50%', padding: '2%'}}><p>Preço $10</p>
+            <label style={{width: '25%', padding: '2%'}}><p>Preço $10</p>
                 <input type="radio" name="a" value="potion"
                        onChange={() => this.handleItem({
                            name: 'potion',
@@ -268,7 +276,7 @@ class App extends Component {
                            ataque: 0,
                            cura: 30
                        })}/>
-                <img src={potion} alt={'Poção de cura'}/></label>
+                <img src={potion} style={{width:'100%'}} alt={'Poção de cura'}/></label>
         );
         return array
     }
@@ -324,7 +332,8 @@ class App extends Component {
                     </tr>
                     <tr style={{border: '1px solid black'}}>
                         <th style={{width: '25%', border: '1px solid black', textAlign: 'center'}}>
-                            <ProgressBar striped bsStyle="danger" now={this.state.user.life} max={this.state.user.maximo_life} label="Life"/>
+                            <ProgressBar striped bsStyle="danger" now={this.state.user.life}
+                                         max={this.state.user.maximo_life} label="Life"/>
                             <var style={{color: 'yellow', fontSize: '20px'}}>Gold: ${this.state.user.gold}</var>
                             <img src={this.state.user.imagem} alt={this.state.user.name} style={{width: '100%'}}/>
                         </th>
@@ -443,8 +452,7 @@ class App extends Component {
                     </Modal.Body>
                     <Modal.Footer>
                         <Button
-                            disabled={this.state.enemy.foto} onClick={()=> this.atacar(this.state.enemy, 'quit')}>{this.state.enemy.foto ?
-                            'Duelo a força não é possivel sair até terminar' :'Sair'}</Button>
+                            onClick={() => this.atacar(this.state.enemy, 'quit')}>{'Sair'}</Button>
                     </Modal.Footer>
                 </Modal>
 
