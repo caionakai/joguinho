@@ -1,4 +1,4 @@
-## Um joguinho feito utilizando o SOAP
+## Um joguinho simples utilizando o SOAP
 ###### Como executar
 1. Execute o comando `npm i` na raíz do projeto para instalar as dependências
 2. Na pasta /src, onde está o arquivo Server.js execute o comando `node Server.js` para inciar o servidor.
