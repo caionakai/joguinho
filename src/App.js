@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import './App.css';
-import {Button, Modal, ProgressBar, ListGroupItem, ListGroup, Table, Panel, Row, Col, Grid} from 'react-bootstrap';
+import {Button, Modal, ProgressBar, ListGroupItem, ListGroup, Table, Row, Col, Grid} from 'react-bootstrap';
 import skull from './skull.png';
 import sword from './sword.png';
 import pistol from './pistol.png';
@@ -8,8 +8,8 @@ import bow from './bow.png';
 import potion from './potion.png';
 import {confirmAlert} from "react-confirm-alert";
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
-const ip = require('ip').address();
-const url = 'http://20.0.189.232:8001/wscalc1?wsdl';
+
+const url = 'http://localhost:8001/wscalc1?wsdl';
 const soap = require('soap-everywhere');
 
 class App extends Component {
@@ -31,11 +31,12 @@ class App extends Component {
             enemy: ''
         }
     }
-
+    // função que realiza o bind do objeto selecionado na loja
     handleItem(obj) {
         this.setState({item: obj});
     }
 
+    // carrega os dados que vieram da página do cadastro
     componentDidMount() {
         let self = this;
         new Promise(async function (response, reject) {
@@ -60,9 +61,9 @@ class App extends Component {
 
     render_map() {
         let table = [];
-
+        // tamanho do mapa (o mapa é sempre quadrado)
         let size = Math.sqrt(this.state.map.length);
-        // Outer loop to create parent
+
         let children = [];
         children.push(<td>{`_//_`}</td>);
         for (let j = 0; j < size; j++) {
@@ -71,7 +72,6 @@ class App extends Component {
         table.push(<tr>{children}</tr>);
         for (let i = 0; i < size; i++) {
             let children = [];
-            //Inner loop to create children
             children.push(<td>{`_${(i + 1).toString().padStart(2, '0')}_`}</td>);
             for (let j = 0; j < size; j++) {
                 let position = this.load_position(i, j);
@@ -80,8 +80,6 @@ class App extends Component {
                 }
                 else {
                     if (position.monster && position.monster.hasOwnProperty('name')) {
-
-                        // eslint-disable-next-line
                         children.push(
                             <td style={{fontSize: '.8em'}}>
                                 <a className={'hand'}
@@ -105,7 +103,6 @@ class App extends Component {
                         }
                     }
                     else {
-                        // eslint-disable-next-line
                         children.push(<td>
                             <a className={'hand'}
                                onClick={() => this.move(position)}>{`_.._`}</a>
@@ -113,12 +110,12 @@ class App extends Component {
                     }
                 }
             }
-            //Create the parent and add the children
             table.push(<tr>{children}</tr>)
         }
         return table;
     }
 
+    // função para atacar passando o alvo, item usado no ataque e tipo
     atacar(enemy, type, item = null) {
         let obj = {
             atacante: this.state.user,
@@ -126,6 +123,7 @@ class App extends Component {
             item: item,
             type: type
         };
+        // cria um cliente soap e chamada o método remoto Atacar
         soap.createClient(url, function (err, client) {
             if (err) throw err;
             client.Atacar(obj, function (err, res) {
@@ -136,8 +134,6 @@ class App extends Component {
     }
 
     move(location) {
-
-
         let obj = {
             atacante: {
                 ataque: this.state.user.ataque,
@@ -156,28 +152,30 @@ class App extends Component {
         })
     }
 
-
+    // função para comprar itens que chama dois métodos: AddInventario e RemoveGold
+    // definidas no servidor SOAP
     comprar() {
         let nome = this.state.user.name;
         let item = this.state.item;
         let self = this;
         let preco = item.valor;
 
+        // caso o usuário não tenha dinheiro suficiente
         if (this.state.user.gold < item.valor) {
-            alert("vc nao tem money suficiente $$");
+            alert("Você não tem dinheiro suficiente $$");
             this.setState({lgShow: false})
         }
         else {
             soap.createClient(url, function (err, client) {
                 if (err) throw err;
-
-
+                // adiciona o item no inventário do usuário
                 client.AddInventario({name: nome, item: item}, function (err, res) {
                     if (err) throw err;
                     self.setState({
                         inventario: res.Inventario
                     });
                 });
+                // retira o dinheiro de acordo com o valor do item
                 client.RemoveGold({name: nome, valor: preco}, function (err, res) {
                     if (err) throw err;
                     console.log(res);
@@ -190,14 +188,13 @@ class App extends Component {
             this.setState({lgShow: false})
         }
     }
-
+    // função para itens (por enquanto só poção)
     use_item(item) {
         var nome = this.state.user.name;
         let self = this;
         console.log(item);
         soap.createClient(url, function (err, client) {
             if (err) throw err;
-
 
             client.Use_Item({name: nome, item: item}, function (err, res) {
                 if (err) throw err;
@@ -226,6 +223,7 @@ class App extends Component {
         )
     }
 
+    // função que imprime o invetário do usuário
     imprimeInventario() {
         let count = {};
         let count2 = {};
@@ -246,8 +244,10 @@ class App extends Component {
         });
     }
 
+    // lista de itens que são vendidos no modal da lojinha 
     lista() {
         let array = [];
+        // coloca tags dentro do array para ser retornado dentro do modal da loja
         array.push(
             <label style={{width: '25%', padding: '2%'}}><p>Preço $100</p>
                 <input type="radio" name="a" value="sword"
@@ -293,6 +293,7 @@ class App extends Component {
         return array
     }
 
+    // função que controla a batalha entre os monstros e usuários
     batalha = (enemy, inventario, disabled) => {
         let count = {};
         let count2 = {};
@@ -326,7 +327,7 @@ class App extends Component {
         let lgClose = () => this.setState({lgShow: false});
         return (
             <div className="App">
-
+                
                 <table style={{width: '80%', marginLeft: '10%'}}>
                     <tr style={{border: '1px solid black'}}>
                         <td style={{border: '1px solid black', textAlign: 'center'}}>
@@ -361,7 +362,7 @@ class App extends Component {
                         </th>
                     </tr>
                 </table>
-
+                
                 <Modal bsSize="large"
                        aria-labelledby="contained-modal-title-sm"
                        show={this.state.lgShow} onHide={lgClose}
@@ -471,7 +472,7 @@ class App extends Component {
             </div>
         );
     }
-
+    // função que abre o modal quando o jogador morre
     morreu = async () => {
         let self = this;
         this.setState({user: {}});

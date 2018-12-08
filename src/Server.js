@@ -1,13 +1,13 @@
 /*jslint node: true */
 "use strict";
 
-const ip = require('ip').address();
 const soap = require('soap');
 const express = require('express');
 const cors = require('cors');
 
 let Map = {
     map: [],
+    // função para criar o mapa
     create: function () {
         for (let i = 0; i < 15; i++) {
             for (let j = 0; j < 15; j++) {
@@ -17,8 +17,9 @@ let Map = {
         for (let i = 0; i < 10; i++)
             this.add_random_monster()
     },
-    add_random_monster: function () {
 
+    // função para adicionar monstros randomicos no mapa
+    add_random_monster: function () {
         switch (Math.floor((Math.random() * 4))) {
             case 1: {
                 this.add_monster({
@@ -54,22 +55,32 @@ let Map = {
                 break;
             }
         }
-    }
-    , add_monster: function (monster) {
+    }, 
+    
+    // função que adiciona o monstro em alguma posição
+    add_monster: function (monster) {
         let position = Map.clear();
         monster.x = position.x;
         monster.y = position.y;
         this.load_location(position.x, position.y).monster = monster
     },
+
+    // função que retorna o mapa
     load: function () {
         return this.map
     },
+
+    // função de adicionar usuário em determinada posição
     add_user: function (user) {
         this.load_location(user.x, user.y).usuario = user
     },
+
+    // função que retorna o que tem no mapa (monstro | usuario) 
     load_location: function (x, y) { // get usuario
         return this.map.find(obj => obj.x === parseInt(x) && obj.y === parseInt(y))
     },
+
+    // função que verifica se o usuário pode se movimentar ou monstro pode ser criado em determinada posição
     clear: function () {
         let len = Math.sqrt(Map.map.length);
         let position = Map.load_location(Math.floor((Math.random() * len)), Math.floor((Math.random() * len)));
@@ -81,6 +92,8 @@ let Map = {
 };
 let User = {
     userList: [],
+
+    // função que cria o usuário
     create: function (obj) {
         let position = Map.clear();
         let user = { // funcao para criar usuario
@@ -98,22 +111,32 @@ let User = {
         Map.add_user(user);
         return user;
     },
+
+    // função que retorna o usuário pelo nome
     load_name: function (name) { // get usuario
         return this.userList.find(x => x.name === name)
     },
+
+    // função que retorna o usuário pela posição
     load_location: function (x, y) { // get usuario
         return this.userList.find(obj => obj.x === parseInt(x) && obj.y === parseInt(y))
     },
+
+    // função que apaga o usuário
     remove: function (x, y) {
         delete Map.load_location(x, y).usuario;
         let i = this.userList.findIndex(obj => obj.x === parseInt(x) && obj.y === parseInt(y));
         this.userList.splice(i, 1);
     },
+
+    // função que remove o gold do usuário (usado quando ele compra algo na loja)
     remove_gold: function (name, valor) {// tira dinheiro do usuario
         let user = this.load_name(name);
         user.gold -= valor;
         return user.gold
     },
+
+    // função que trata da batalha entre usuárioxusuário | usuárioxmonstro
     atacar: function (obj) {
         let atacante = this.load_location(obj.atacante.x, obj.atacante.y);
         switch (obj.type) {
@@ -216,6 +239,8 @@ let User = {
         }
 
     },
+
+    // função para andar no mapa
     move: function (obj) {
         let position_alvo = Map.load_location(obj.atacante.x, obj.atacante.y);
         delete position_alvo.usuario;
@@ -227,19 +252,25 @@ let User = {
         position_alvo.usuario = user;
         return user
     },
+
+    // função para adicionar item no invetário
     add_item: function (name, item) { // adiciona item no inventario passando name do usuario e o item
         this.load_name(name).inventario.push(item)
     },
+
     delete_item: function (name, item_usado) {
         let i = this.load_name(name).inventario.findIndex(item => item.name == item_usado.name && item.ataque == item_usado.ataque);
         this.load_name(name).inventario.splice(i, 1)
     },
+
     find_item: function(name, item_usado){
         return this.load_name(name).inventario.find(item => item.name == item_usado.name && item.ataque == item_usado.ataque);
     },
+
+    // função que usa os itens (poção ou arma)
     use_item: function (name, item) {
         switch (item.name) {
-            case 'potion': {// cura vida passando name do usuario e qnt de vida a ser curada
+            case 'potion': {
                 let x = this.load_name(name);
                 if (x.life >= 100) return {ataque: 0};
 
@@ -272,6 +303,7 @@ let User = {
 Map.create();
 let service = {
     ws: {
+        // nome das funções definidas também no wsdl
         funcoes: {
             GetUser: function (obj) {
                 return {User: User.load_name(obj.name)}
@@ -307,11 +339,12 @@ let service = {
 };
 
 let xml = require('fs').readFileSync('myservice.wsdl', 'utf8');
-// xml = xml.replace('localhost', ip);
 let server = express();
 
+// remove o bug do Cors
 server.use(cors());
 
+// servidor escutando na porta 8001
 server.listen(8001);
 soap.listen(server, '/wscalc1', service, xml);
-console.log("server on..");
+console.log("Servidor Ligado..");
