@@ -1,11 +1,11 @@
 import React, {Component} from 'react';
 import './App.css';
 import {Button, Modal, ProgressBar, ListGroupItem, ListGroup, Table, Row, Col, Grid} from 'react-bootstrap';
-import skull from './skull.png';
-import sword from './sword.png';
-import pistol from './pistol.png';
-import bow from './bow.png';
-import potion from './potion.png';
+import skull from './img/skull.png';
+import sword from './img/sword.png';
+import pistol from './img/pistol.png';
+import bow from './img/bow.png';
+import potion from './img/potion.png';
 import {confirmAlert} from "react-confirm-alert";
 import 'react-confirm-alert/src/react-confirm-alert.css' // Import css
 

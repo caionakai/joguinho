@@ -1,9 +1,9 @@
 import React from 'react';
 import {Button, ControlLabel, FormControl, FormGroup} from 'react-bootstrap';
 import './Cadastro.css';
-import saber from './saber.png';
-import archer from './archer.png';
-import corrin from './corrin.png';
+import saber from './img/saber.png';
+import archer from './img/archer.png';
+import corrin from './img/corrin.png';
 import {url} from "./App";
 
 const soap = require('soap-everywhere');
